@@ -23,6 +23,7 @@ import com.example.simplenote.R
 import com.example.simplenote.ui.components.PrimaryPillButton
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun LoginScreen(
@@ -65,7 +66,7 @@ fun LoginScreen(
                 text = stringResource(R.string.login_title),
                 fontSize = 32.sp,
                 color = Color(0xFF180E25),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 lineHeight = 38.sp
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -227,24 +228,11 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedButton(
-                onClick = { viewModel.onRegisterClick() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color(0xFF504EC3)
-                ),
-                border = BorderStroke(1.dp, Color(0xFF504EC3))
-            ) {
-                Text(
-                    text = stringResource(R.string.register_button),
-                    fontSize = 16.sp,
-                    color = Color(0xFF504EC3),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+            // Footer
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                TextButton(onClick = onNavigateRegister) {
+                    Text(text = "Don't have an account? Register here")
+                }
             }
         }
     }

@@ -4,11 +4,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.simplenote.R
 import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
@@ -47,21 +53,36 @@ fun RegisterScreen(
             value = uiState.firstName,
             onValueChange = { viewModel.onFirstNameChange(it) },
             label = { Text("First Name") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         OutlinedTextField(
             value = uiState.lastName,
             onValueChange = { viewModel.onLastNameChange(it) },
             label = { Text("Last Name") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         OutlinedTextField(
             value = uiState.username,
             onValueChange = { viewModel.onUsernameChange(it) },
             label = { Text("Username") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         OutlinedTextField(
@@ -69,7 +90,12 @@ fun RegisterScreen(
             onValueChange = { viewModel.onEmailChange(it) },
             label = { Text("Email Address") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         OutlinedTextField(
@@ -77,7 +103,12 @@ fun RegisterScreen(
             onValueChange = { viewModel.onPasswordChange(it) },
             label = { Text("Password") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         OutlinedTextField(
@@ -85,19 +116,31 @@ fun RegisterScreen(
             onValueChange = { viewModel.onConfirmPasswordChange(it) },
             label = { Text("Retype Password") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color(0xFF180E25),
+                unfocusedTextColor = Color(0xFF180E25),
+                errorTextColor = Color(0xFF180E25)
+            )
         )
 
         // Register Button
         PrimaryPillButton(
             text = "Register",
             onClick = { viewModel.submit(onRegisterSuccess) },
-            enabled = uiState.isSubmitEnabled
+            enabled = uiState.isSubmitEnabled,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp),
+            containerColor = Color(0xFF504EC3),
+            contentColor = Color.White
         )
 
         // Footer
-        TextButton(onClick = onBackToLogin) {
-            Text(text = "Already have an account? Login here")
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            TextButton(onClick = onBackToLogin) {
+                Text(text = "Already have an account? Login here")
+            }
         }
     }
 }
