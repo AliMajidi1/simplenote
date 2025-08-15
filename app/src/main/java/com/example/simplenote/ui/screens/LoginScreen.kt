@@ -80,21 +80,21 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = stringResource(R.string.email_label),
+                text = "Username",
                 fontSize = 16.sp,
                 color = Color(0xFF180E25),
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
-                value = uiState.email,
-                onValueChange = viewModel::onEmailChange,
+                value = uiState.username,
+                onValueChange = viewModel::onUsernameChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(54.dp),
                 placeholder = {
                     Text(
-                        text = stringResource(R.string.email_placeholder),
+                        text = "Enter your username",
                         fontSize = 16.sp,
                         color = Color(0xFFC8C5CB),
                         style = MaterialTheme.typography.bodyMedium
@@ -116,11 +116,11 @@ fun LoginScreen(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) }
                 ),
-                isError = uiState.emailError != null
+                isError = uiState.usernameError != null
             )
-            if (uiState.emailError != null) {
+            if (uiState.usernameError != null) {
                 Text(
-                    text = uiState.emailError ?: "",
+                    text = uiState.usernameError ?: "",
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 4.dp)
@@ -191,7 +191,7 @@ fun LoginScreen(
                 PrimaryPillButton(
                     text = stringResource(R.string.login_button),
                     onClick = { viewModel.submit() },
-                    enabled = !uiState.isLoading && uiState.email.isNotBlank() && uiState.password.isNotBlank(),
+                    enabled = !uiState.isLoading && uiState.username.isNotBlank() && uiState.password.isNotBlank(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),

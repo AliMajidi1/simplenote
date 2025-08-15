@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import android.util.Patterns
 
 sealed class LoginEvent {
     object NavigateHome : LoginEvent()
@@ -18,9 +17,9 @@ sealed class LoginEvent {
 }
 
 data class LoginUiState(
-    val email: String = "",
+    val username: String = "",
     val password: String = "",
-    val emailError: String? = null,
+    val usernameError: String? = null,
     val passwordError: String? = null,
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
@@ -36,8 +35,8 @@ class LoginViewModel(
     private val _events = MutableSharedFlow<LoginEvent>()
     val events: SharedFlow<LoginEvent> = _events
 
-    fun onEmailChange(email: String) {
-        _uiState.value = _uiState.value.copy(email = email, emailError = null, apiError = null)
+    fun onUsernameChange(username: String) {
+        _uiState.value = _uiState.value.copy(username = username, usernameError = null, apiError = null)
     }
 
     fun onPasswordChange(password: String) {
@@ -49,13 +48,13 @@ class LoginViewModel(
     }
 
     fun submit() {
-        val email = _uiState.value.email.trim()
+        val username = _uiState.value.username.trim()
         val password = _uiState.value.password
         var valid = true
-        var emailError: String? = null
+        var usernameError: String? = null
         var passwordError: String? = null
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailError = "Invalid email address"
+        if (username.isEmpty()) {
+            usernameError = "Username cannot be empty"
             valid = false
         }
         if (password.length < 6) {
@@ -63,19 +62,19 @@ class LoginViewModel(
             valid = false
         }
         if (!valid) {
-            _uiState.value = _uiState.value.copy(emailError = emailError, passwordError = passwordError)
+            _uiState.value = _uiState.value.copy(usernameError = usernameError, passwordError = passwordError)
             return
         }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, apiError = null)
-            authRepository.login(email, password).collect { result ->
+            authRepository.login(username, password).collect { result ->
                 when (result) {
                     is NetworkResult.Success -> {
                         _uiState.value = _uiState.value.copy(isLoading = false)
                         _events.emit(LoginEvent.NavigateHome)
                     }
                     is NetworkResult.HttpError -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Invalid email or password")
+                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Invalid username or password")
                     }
                     is NetworkResult.NetworkError -> {
                         _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Please check your internet connection.")
@@ -94,4 +93,3 @@ class LoginViewModel(
         }
     }
 }
-

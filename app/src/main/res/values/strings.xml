@@ -5,8 +5,8 @@
     <string name="cd_onboarding_illustration">Idea illustration</string>
     <string name="login_title">Let’s Login</string>
     <string name="login_subtitle">And notes your idea</string>
-    <string name="email_label">Email Address</string>
-    <string name="email_placeholder">Example: johndoe@gmail.com</string>
+    <string name="username_label">Username</string>
+    <string name="username_placeholder">Enter your username</string>
     <string name="password_label">Password</string>
     <string name="password_placeholder">********</string>
     <string name="login_button">Login</string>
@@ -14,7 +14,7 @@
     <string name="register_button">Don’t have any account? Register here</string>
     <string name="error_invalid_email">Invalid email address</string>
     <string name="error_invalid_password">Password must be at least 6 characters</string>
-    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="error_invalid_credentials">Invalid username or password</string>
     <string name="error_network">Please check your internet connection.</string>
     <string name="error_unknown">Something went wrong. Please try again.</string>
     <string name="login_arrow_icon_desc">Login</string>
