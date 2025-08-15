@@ -11,10 +11,10 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import kotlinx.serialization.ExperimentalSerializationApi
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
-import java.util.concurrent.TimeUnit
 
 val NetworkModule = module {
     single { provideOkHttpClient() }
@@ -39,12 +39,10 @@ private fun provideOkHttpClient(): OkHttpClient {
     return builder.build()
 }
 
-@OptIn(ExperimentalSerializationApi::class)
 private fun provideRetrofit(client: OkHttpClient, baseUrl: String): Retrofit {
-    val contentType = "application/json".toMediaType()
     return Retrofit.Builder()
         .baseUrl(baseUrl)
-        .addConverterFactory(Json { ignoreUnknownKeys = true }.asConverterFactory(contentType))
+        .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()
 }

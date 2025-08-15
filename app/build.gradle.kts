@@ -61,7 +61,6 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.retrofit)
-    implementation(libs.converter.gson)
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
     implementation(libs.kotlinx.serialization.json)
@@ -70,4 +69,5 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.material)
+    implementation(libs.converter.gson)
 }
