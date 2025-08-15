@@ -85,20 +85,28 @@ class RegisterViewModel(
 
     fun submit(onSuccess: () -> Unit) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSubmitting = true)
-            try {
-                authRepository.register(
-                    firstName = _uiState.value.firstName,
-                    lastName = _uiState.value.lastName,
-                    username = _uiState.value.username,
-                    email = _uiState.value.email,
-                    password = _uiState.value.password
-                )
-                onSuccess()
-            } catch (e: Exception) {
-                // Handle error (e.g., show snackbar)
-            } finally {
-                _uiState.value = _uiState.value.copy(isSubmitting = false)
+            _uiState.value = _uiState.value.copy(isSubmitting = true, apiError = null)
+            when (val result = authRepository.register(
+                firstName = _uiState.value.firstName,
+                lastName = _uiState.value.lastName,
+                username = _uiState.value.username,
+                email = _uiState.value.email,
+                password = _uiState.value.password
+            )) {
+                is com.example.simplenote.data.remote.NetworkResult.Success -> {
+                    _uiState.value = _uiState.value.copy(isSubmitting = false, apiError = null)
+                    onSuccess()
+                }
+                is com.example.simplenote.data.remote.NetworkResult.HttpError -> {
+                    val errorMsg = result.message ?: "Registration failed. Please check your details."
+                    _uiState.value = _uiState.value.copy(isSubmitting = false, apiError = errorMsg)
+                }
+                is com.example.simplenote.data.remote.NetworkResult.NetworkError -> {
+                    _uiState.value = _uiState.value.copy(isSubmitting = false, apiError = "Please check your internet connection.")
+                }
+                is com.example.simplenote.data.remote.NetworkResult.UnknownError -> {
+                    _uiState.value = _uiState.value.copy(isSubmitting = false, apiError = "Something went wrong. Please try again.")
+                }
             }
         }
     }
@@ -118,5 +126,6 @@ data class RegisterUiState(
     val usernameError: String? = null,
     val emailError: String? = null,
     val passwordError: String? = null,
-    val confirmPasswordError: String? = null
+    val confirmPasswordError: String? = null,
+    val apiError: String? = null
 )

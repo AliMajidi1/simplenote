@@ -226,9 +226,8 @@ fun LoginScreen(
                         .background(Color(0xFFEFEEF0))
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Footer
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 TextButton(onClick = onNavigateRegister) {
                     Text(text = "Don't have an account? Register here")

@@ -1,6 +1,7 @@
 package com.example.simplenote.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,8 @@ import com.example.simplenote.data.remote.AuthApi
 import com.example.simplenote.ui.components.PrimaryPillButton
 import org.koin.compose.getKoin
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.remember
 
 @Composable
 fun RegisterScreen(
@@ -42,14 +45,15 @@ fun RegisterScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(start = 16.dp, end = 16.dp, top = 32.dp)
-                .systemBarsPadding(),
+                .padding(start = 16.dp, end = 16.dp, top = 0.dp)
+                .verticalScroll(rememberScrollState()), // Make scrollable
             verticalArrangement = Arrangement.Top
         ) {
             TextButton(onClick = onBackToLogin) {
                 Text(text = stringResource(R.string.back_to_login))
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            // Remove top Spacer, keep only minimal spacing
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.register_title),
                 fontSize = 32.sp,
@@ -57,7 +61,7 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 lineHeight = 38.sp
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.register_subtitle),
                 fontSize = 16.sp,
@@ -65,7 +69,7 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 22.sp
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp)) // Reduce space before fields
 
             // First Name
             Text(
@@ -347,8 +351,7 @@ fun RegisterScreen(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(32.dp))
-
+            Spacer(modifier = Modifier.height(24.dp)) // Reduce space before Register button
             PrimaryPillButton(
                 text = stringResource(R.string.register_cta),
                 onClick = { viewModel.submit(onRegisterSuccess) },
@@ -359,7 +362,7 @@ fun RegisterScreen(
                 containerColor = Color(0xFF504EC3),
                 contentColor = Color.White
             )
-
+            Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 TextButton(onClick = onBackToLogin) {
                     Text(text = stringResource(R.string.already_have_account))
