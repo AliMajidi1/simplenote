@@ -68,7 +68,8 @@ fun OnboardingScreen(
                     onClick = onGetStarted,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    trailingIconSize = 28.dp
                 )
                 Spacer(modifier = Modifier.height(32.dp))
             }

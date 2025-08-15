@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Icon
+import androidx.compose.ui.unit.Dp
 
 @Composable
 fun PrimaryPillButton(
@@ -23,6 +24,7 @@ fun PrimaryPillButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     trailingIcon: ImageVector? = Icons.AutoMirrored.Rounded.ArrowForward,
+    trailingIconSize: Dp = 28.dp,
     contentDescription: String? = null
 ) {
     Button(
@@ -58,7 +60,7 @@ fun PrimaryPillButton(
                     contentDescription = contentDescription,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .size(20.dp)
+                        .size(trailingIconSize)
                         .padding(start = 8.dp, end = 0.dp)
                 )
             }

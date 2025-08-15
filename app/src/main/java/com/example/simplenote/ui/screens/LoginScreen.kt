@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simplenote.R
+import com.example.simplenote.ui.components.PrimaryPillButton
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.focus.FocusDirection
 
@@ -190,46 +191,15 @@ fun LoginScreen(
 
             // Primary Button
             Box(modifier = Modifier.fillMaxWidth()) {
-                Button(
+                PrimaryPillButton(
+                    text = stringResource(R.string.login_button),
                     onClick = { viewModel.submit() },
                     enabled = !uiState.isLoading && uiState.email.isNotBlank() && uiState.password.isNotBlank(),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                    shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF504EC3),
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFF504EC3).copy(alpha = 0.4f)
-                    )
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = stringResource(R.string.login_button),
-                            modifier = Modifier.align(Alignment.Center),
-                            fontSize = 16.sp,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_forward),
-                            contentDescription = stringResource(R.string.login_arrow_icon_desc),
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .size(20.dp)
-                                .padding(end = 20.dp),
-                            tint = Color.White
-                        )
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(24.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        }
-                    }
-                }
+                    trailingIconSize = 28.dp
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
 
