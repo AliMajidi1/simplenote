@@ -7,6 +7,7 @@ import com.example.simplenote.data.remote.TokenObtainPairResponse
 import com.example.simplenote.data.remote.RegisterRequest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.json.JSONObject
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -21,7 +22,8 @@ class AuthRepository(
             emit(NetworkResult.Success(response))
         } catch (e: HttpException) {
             val code = e.code()
-            val msg = e.response()?.errorBody()?.string() ?: e.message()
+            val errorBody = e.response()?.errorBody()?.string()
+            val msg = parseValidationError(errorBody) ?: e.message()
             emit(NetworkResult.HttpError(code, msg))
         } catch (e: IOException) {
             emit(NetworkResult.NetworkError(e))
@@ -51,12 +53,32 @@ class AuthRepository(
             NetworkResult.Success(Unit)
         } catch (e: HttpException) {
             val code = e.code()
-            val msg = e.response()?.errorBody()?.string() ?: e.message()
+            val errorBody = e.response()?.errorBody()?.string()
+            val msg = parseValidationError(errorBody) ?: e.message()
             NetworkResult.HttpError(code, msg)
         } catch (e: IOException) {
             NetworkResult.NetworkError(e)
         } catch (e: Exception) {
             NetworkResult.UnknownError(e)
+        }
+    }
+
+    private fun parseValidationError(errorBody: String?): String? {
+        if (errorBody == null) return null
+        return try {
+            val json = JSONObject(errorBody)
+            if (json.optString("type") == "validation_error") {
+                val errors = json.optJSONArray("errors") ?: return null
+                val details = mutableListOf<String>()
+                for (i in 0 until errors.length()) {
+                    val err = errors.optJSONObject(i)
+                    val detail = err?.optString("detail")
+                    if (!detail.isNullOrBlank()) details.add(detail)
+                }
+                if (details.isNotEmpty()) details.joinToString("\n") else null
+            } else null
+        } catch (ex: Exception) {
+            null
         }
     }
 }

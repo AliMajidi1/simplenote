@@ -37,6 +37,12 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(uiState.apiError) {
+        uiState.apiError?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = Color(0xFFFFFFFF)
