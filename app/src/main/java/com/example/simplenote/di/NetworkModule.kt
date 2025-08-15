@@ -5,9 +5,6 @@ import com.example.simplenote.BuildConfig
 import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -18,7 +15,7 @@ import org.koin.dsl.module
 
 val NetworkModule = module {
     single { provideOkHttpClient() }
-    single { provideRetrofit(get(), getProperty("BASE_URL") ?: "https://api.example.com") }
+    single { provideRetrofit(get(), getProperty("BASE_URL")) }
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { TokenStore(get<Context>()) }
     single { AuthRepository(get(), get()) }

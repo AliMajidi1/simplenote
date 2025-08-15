@@ -5,25 +5,17 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 @Serializable
-data class LoginRequest(val email: String, val password: String)
+data class TokenObtainPairRequest(val username: String, val password: String)
 
 @Serializable
-data class LoginResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val user: UserDto
-)
-
-@Serializable
-data class UserDto(
-    val id: String,
-    val email: String,
-    val name: String
+data class TokenObtainPairResponse(
+    val access: String,
+    val refresh: String
 )
 
 interface AuthApi {
-    @POST("auth/login")
-    suspend fun login(@Body body: LoginRequest): LoginResponse
+    @POST("/api/auth/token/")
+    suspend fun obtainToken(@Body body: TokenObtainPairRequest): TokenObtainPairResponse
 }
 
 sealed interface NetworkResult<out T> {
@@ -32,4 +24,3 @@ sealed interface NetworkResult<out T> {
     data class NetworkError(val throwable: Throwable): NetworkResult<Nothing>
     data class UnknownError(val throwable: Throwable): NetworkResult<Nothing>
 }
-

@@ -34,7 +34,6 @@ fun LoginScreen(
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Handle navigation events
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
@@ -44,7 +43,6 @@ fun LoginScreen(
         }
     }
 
-    // Show API error as Snackbar
     LaunchedEffect(uiState.apiError) {
         uiState.apiError?.let { msg ->
             snackbarHostState.showSnackbar(msg)
@@ -63,7 +61,6 @@ fun LoginScreen(
                 .systemBarsPadding(),
             verticalArrangement = Arrangement.Top
         ) {
-            // Title Section
             Text(
                 text = stringResource(R.string.login_title),
                 fontSize = 32.sp,
@@ -81,7 +78,6 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Email Field
             Text(
                 text = stringResource(R.string.email_label),
                 fontSize = 16.sp,
@@ -131,7 +127,6 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Password Field
             Text(
                 text = stringResource(R.string.password_label),
                 fontSize = 16.sp,
@@ -191,7 +186,6 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Primary Button
             Box(modifier = Modifier.fillMaxWidth()) {
                 PrimaryPillButton(
                     text = stringResource(R.string.login_button),
@@ -206,7 +200,6 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Divider with "Or"
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.height(15.dp).fillMaxWidth()
@@ -234,7 +227,6 @@ fun LoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Secondary Action Button
             OutlinedButton(
                 onClick = { viewModel.onRegisterClick() },
                 modifier = Modifier

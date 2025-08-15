@@ -36,6 +36,4 @@ class TokenStore(private val context: Context) {
             prefs.remove(REFRESH_TOKEN_KEY)
         }
     }
-    // TODO: Use EncryptedDataStore for production
 }
-
