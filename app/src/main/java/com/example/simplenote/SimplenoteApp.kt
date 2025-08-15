@@ -11,7 +11,7 @@ class SimplenoteApp : Application() {
         startKoin {
             androidContext(this@SimplenoteApp)
             modules(NetworkModule)
+            properties(mapOf("BASE_URL" to "https://simple.darkube.app/api/"))
         }
     }
 }
-

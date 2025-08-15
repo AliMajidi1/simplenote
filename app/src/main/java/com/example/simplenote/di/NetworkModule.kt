@@ -12,6 +12,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import kotlinx.serialization.ExperimentalSerializationApi
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +22,7 @@ val NetworkModule = module {
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { TokenStore(get<Context>()) }
     single { AuthRepository(get(), get()) }
+    viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
 }
 
 private fun provideOkHttpClient(): OkHttpClient {

@@ -107,7 +107,9 @@ fun LoginScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF504EC3),
                     unfocusedBorderColor = Color(0xFFC8C5CB),
-                    errorBorderColor = MaterialTheme.colorScheme.error
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    focusedTextColor = Color(0xFF180E25),
+                    unfocusedTextColor = Color(0xFF180E25)
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
@@ -154,7 +156,9 @@ fun LoginScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF504EC3),
                     unfocusedBorderColor = Color(0xFFC8C5CB),
-                    errorBorderColor = MaterialTheme.colorScheme.error
+                    errorBorderColor = MaterialTheme.colorScheme.error,
+                    focusedTextColor = Color(0xFF180E25),
+                    unfocusedTextColor = Color(0xFF180E25)
                 ),
                 visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
