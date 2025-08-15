@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import com.example.simplenote.data.TokenStore
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.State
+import com.example.simplenote.ui.screens.RegisterScreen
 
 object Destinations {
     const val Onboarding = "onboarding"
@@ -60,12 +61,10 @@ fun AppNavHost(
             )
         }
         composable(Destinations.Register) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Register Screen (Stub)")
-            }
+            RegisterScreen(
+                onBackToLogin = { navController.navigateUp() },
+                onRegisterSuccess = { navController.navigate(Destinations.Login) }
+            )
         }
         composable(Destinations.Home) {
             Box(
