@@ -110,7 +110,8 @@ fun LoginScreen(
                     unfocusedBorderColor = Color(0xFFC8C5CB),
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     focusedTextColor = Color(0xFF180E25),
-                    unfocusedTextColor = Color(0xFF180E25)
+                    unfocusedTextColor = Color(0xFF180E25),
+                    errorTextColor = Color(0xFF180E25)
                 ),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next
@@ -159,7 +160,8 @@ fun LoginScreen(
                     unfocusedBorderColor = Color(0xFFC8C5CB),
                     errorBorderColor = MaterialTheme.colorScheme.error,
                     focusedTextColor = Color(0xFF180E25),
-                    unfocusedTextColor = Color(0xFF180E25)
+                    unfocusedTextColor = Color(0xFF180E25),
+                    errorTextColor = Color(0xFF180E25)
                 ),
                 visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
@@ -198,7 +200,8 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                    trailingIconSize = 28.dp
+                    containerColor = Color(0xFF504EC3),
+                    contentColor = Color.White
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))

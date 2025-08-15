@@ -25,7 +25,9 @@ fun PrimaryPillButton(
     enabled: Boolean = true,
     trailingIcon: ImageVector? = Icons.AutoMirrored.Rounded.ArrowForward,
     trailingIconSize: Dp = 28.dp,
-    contentDescription: String? = null
+    contentDescription: String? = null,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onPrimary,
+    contentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary
 ) {
     Button(
         onClick = onClick,
@@ -36,32 +38,31 @@ fun PrimaryPillButton(
         shape = RoundedCornerShape(100.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onPrimary,
-            contentColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-            disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = containerColor.copy(alpha = 0.5f),
+            disabledContentColor = contentColor.copy(alpha = 0.5f)
         ),
         contentPadding = PaddingValues(horizontal = 24.dp)
     ) {
-        Row(
+        Box(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.weight(1f)
+                color = contentColor,
+                modifier = Modifier.align(Alignment.Center)
             )
             if (trailingIcon != null) {
                 Icon(
                     imageVector = trailingIcon,
                     contentDescription = contentDescription,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = contentColor,
                     modifier = Modifier
+                        .align(Alignment.CenterEnd)
                         .size(trailingIconSize)
-                        .padding(start = 8.dp, end = 0.dp)
                 )
             }
         }
