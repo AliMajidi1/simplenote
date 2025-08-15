@@ -1,6 +1,5 @@
 package com.example.simplenote.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,6 +34,7 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
@@ -45,8 +46,14 @@ fun LoginScreen(
     }
 
     LaunchedEffect(uiState.apiError) {
-        uiState.apiError?.let { msg ->
-            snackbarHostState.showSnackbar(msg)
+        uiState.apiError?.let { error ->
+            val errorRes = when (error) {
+                LoginError.InvalidCredentials -> R.string.error_invalid_credentials
+                LoginError.Network -> R.string.error_network
+                LoginError.Unknown -> R.string.error_unknown
+                else -> null
+            }
+            errorRes?.let { snackbarHostState.showSnackbar(context.getString(it)) }
         }
     }
 
@@ -80,7 +87,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Username",
+                text = stringResource(R.string.username_label),
                 fontSize = 16.sp,
                 color = Color(0xFF180E25),
                 style = MaterialTheme.typography.bodyMedium
@@ -94,7 +101,7 @@ fun LoginScreen(
                     .height(54.dp),
                 placeholder = {
                     Text(
-                        text = "Enter your username",
+                        text = stringResource(R.string.username_placeholder),
                         fontSize = 16.sp,
                         color = Color(0xFFC8C5CB),
                         style = MaterialTheme.typography.bodyMedium
@@ -119,12 +126,18 @@ fun LoginScreen(
                 isError = uiState.usernameError != null
             )
             if (uiState.usernameError != null) {
-                Text(
-                    text = uiState.usernameError ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                val errorRes = when (uiState.usernameError) {
+                    LoginError.UsernameRequired -> R.string.error_username_required
+                    else -> null
+                }
+                if (errorRes != null) {
+                    Text(
+                        text = stringResource(errorRes),
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -178,12 +191,18 @@ fun LoginScreen(
                 isError = uiState.passwordError != null
             )
             if (uiState.passwordError != null) {
-                Text(
-                    text = uiState.passwordError ?: "",
-                    color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                val errorRes = when (uiState.passwordError) {
+                    LoginError.PasswordInvalid -> R.string.error_invalid_password
+                    else -> null
+                }
+                if (errorRes != null) {
+                    Text(
+                        text = stringResource(errorRes),
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(40.dp))
 
@@ -230,7 +249,7 @@ fun LoginScreen(
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 TextButton(onClick = onNavigateRegister) {
-                    Text(text = "Don't have an account? Register here")
+                    Text(text = stringResource(R.string.register_button))
                 }
             }
         }

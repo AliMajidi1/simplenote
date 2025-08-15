@@ -16,14 +16,22 @@ sealed class LoginEvent {
     object NavigateRegister : LoginEvent()
 }
 
+sealed class LoginError {
+    object UsernameRequired : LoginError()
+    object PasswordInvalid : LoginError()
+    object InvalidCredentials : LoginError()
+    object Network : LoginError()
+    object Unknown : LoginError()
+}
+
 data class LoginUiState(
     val username: String = "",
     val password: String = "",
-    val usernameError: String? = null,
-    val passwordError: String? = null,
+    val usernameError: LoginError? = null,
+    val passwordError: LoginError? = null,
     val isPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
-    val apiError: String? = null
+    val apiError: LoginError? = null
 )
 
 class LoginViewModel(
@@ -51,14 +59,14 @@ class LoginViewModel(
         val username = _uiState.value.username.trim()
         val password = _uiState.value.password
         var valid = true
-        var usernameError: String? = null
-        var passwordError: String? = null
+        var usernameError: LoginError? = null
+        var passwordError: LoginError? = null
         if (username.isEmpty()) {
-            usernameError = "Username cannot be empty"
+            usernameError = LoginError.UsernameRequired
             valid = false
         }
         if (password.length < 6) {
-            passwordError = "Password must be at least 6 characters"
+            passwordError = LoginError.PasswordInvalid
             valid = false
         }
         if (!valid) {
@@ -74,13 +82,13 @@ class LoginViewModel(
                         _events.emit(LoginEvent.NavigateHome)
                     }
                     is NetworkResult.HttpError -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Invalid username or password")
+                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = LoginError.InvalidCredentials)
                     }
                     is NetworkResult.NetworkError -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Please check your internet connection.")
+                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = LoginError.Network)
                     }
                     is NetworkResult.UnknownError -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = "Something went wrong. Please try again.")
+                        _uiState.value = _uiState.value.copy(isLoading = false, apiError = LoginError.Unknown)
                     }
                 }
             }

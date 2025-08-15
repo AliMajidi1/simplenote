@@ -37,4 +37,5 @@
     <string name="error_password_match">Passwords do not match</string>
     <string name="error_server_generic">Something went wrong. Please try again.</string>
     <string name="email">Email</string>
+    <string name="error_username_required">Username cannot be empty</string>
 </resources>
