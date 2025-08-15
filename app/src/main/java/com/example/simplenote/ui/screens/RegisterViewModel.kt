@@ -46,14 +46,41 @@ class RegisterViewModel(
 
     private fun validateForm() {
         val state = _uiState.value
-        val isValid = state.firstName.isNotBlank() &&
-                state.lastName.isNotBlank() &&
-                state.username.length >= 3 && state.username.matches(Regex("^[a-zA-Z][a-zA-Z0-9_]*$")) &&
-                state.email.contains("@") &&
-                state.password.length >= 8 && state.password.any { it.isDigit() } && state.password.any { it.isLetter() } &&
-                state.password == state.confirmPassword
+        val firstNameError = if (state.firstName.isBlank()) "First name is required" else null
+        val lastNameError = if (state.lastName.isBlank()) "Last name is required" else null
+        val usernameError = when {
+            state.username.isBlank() -> "Username is required"
+            state.username.length < 3 -> "Username must be at least 3 characters"
+            !state.username.matches(Regex("^[a-zA-Z][a-zA-Z0-9_]*$")) -> "Invalid username format"
+            else -> null
+        }
+        val emailError = if (!state.email.contains("@")) "Invalid email address" else null
+        val passwordError = when {
+            state.password.length < 8 -> "Password must be at least 8 characters"
+            !state.password.any { it.isDigit() } -> "Password must contain a digit"
+            !state.password.any { it.isLetter() } -> "Password must contain a letter"
+            else -> null
+        }
+        val confirmPasswordError = if (state.password != state.confirmPassword) "Passwords do not match" else null
 
-        _uiState.value = state.copy(isSubmitEnabled = isValid)
+        val isValid = listOf(
+            firstNameError,
+            lastNameError,
+            usernameError,
+            emailError,
+            passwordError,
+            confirmPasswordError
+        ).all { it == null }
+
+        _uiState.value = state.copy(
+            isSubmitEnabled = isValid,
+            firstNameError = firstNameError,
+            lastNameError = lastNameError,
+            usernameError = usernameError,
+            emailError = emailError,
+            passwordError = passwordError,
+            confirmPasswordError = confirmPasswordError
+        )
     }
 
     fun submit(onSuccess: () -> Unit) {
@@ -85,5 +112,11 @@ data class RegisterUiState(
     val password: String = "",
     val confirmPassword: String = "",
     val isSubmitEnabled: Boolean = false,
-    val isSubmitting: Boolean = false
+    val isSubmitting: Boolean = false,
+    val firstNameError: String? = null,
+    val lastNameError: String? = null,
+    val usernameError: String? = null,
+    val emailError: String? = null,
+    val passwordError: String? = null,
+    val confirmPasswordError: String? = null
 )
