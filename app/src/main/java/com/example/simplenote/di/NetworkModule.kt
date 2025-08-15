@@ -1,0 +1,48 @@
+package com.example.simplenote.di
+
+import android.content.Context
+import com.example.simplenote.BuildConfig
+import com.example.simplenote.data.AuthRepository
+import com.example.simplenote.data.TokenStore
+import com.example.simplenote.data.remote.AuthApi
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import kotlinx.serialization.ExperimentalSerializationApi
+import org.koin.dsl.module
+import java.util.concurrent.TimeUnit
+
+val NetworkModule = module {
+    single { provideOkHttpClient() }
+    single { provideRetrofit(get(), getProperty("BASE_URL") ?: "https://api.example.com") }
+    single { get<Retrofit>().create(AuthApi::class.java) }
+    single { TokenStore(get<Context>()) }
+    single { AuthRepository(get(), get()) }
+}
+
+private fun provideOkHttpClient(): OkHttpClient {
+    val builder = OkHttpClient.Builder()
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(15, TimeUnit.SECONDS)
+    if (BuildConfig.DEBUG) {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+        builder.addInterceptor(logging)
+    }
+    return builder.build()
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+private fun provideRetrofit(client: OkHttpClient, baseUrl: String): Retrofit {
+    val contentType = "application/json".toMediaType()
+    return Retrofit.Builder()
+        .baseUrl(baseUrl)
+        .addConverterFactory(Json { ignoreUnknownKeys = true }.asConverterFactory(contentType))
+        .client(client)
+        .build()
+}

@@ -1,0 +1,282 @@
+package com.example.simplenote.ui.screens
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.simplenote.R
+import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.ui.focus.FocusDirection
+
+@Composable
+fun LoginScreen(
+    viewModel: LoginViewModel,
+    onNavigateHome: () -> Unit,
+    onNavigateRegister: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    val focusManager = LocalFocusManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Handle navigation events
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is LoginEvent.NavigateHome -> onNavigateHome()
+                is LoginEvent.NavigateRegister -> onNavigateRegister()
+            }
+        }
+    }
+
+    // Show API error as Snackbar
+    LaunchedEffect(uiState.apiError) {
+        uiState.apiError?.let { msg ->
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = Color(0xFFFFFFFF)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(start = 16.dp, end = 16.dp, top = 32.dp)
+                .systemBarsPadding(),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Title Section
+            Text(
+                text = stringResource(R.string.login_title),
+                fontSize = 32.sp,
+                color = Color(0xFF180E25),
+                style = MaterialTheme.typography.headlineLarge,
+                lineHeight = 38.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.login_subtitle),
+                fontSize = 16.sp,
+                color = Color(0xFF827D89),
+                style = MaterialTheme.typography.bodyMedium,
+                lineHeight = 22.sp
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Email Field
+            Text(
+                text = stringResource(R.string.email_label),
+                fontSize = 16.sp,
+                color = Color(0xFF180E25),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = uiState.email,
+                onValueChange = viewModel::onEmailChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.email_placeholder),
+                        fontSize = 16.sp,
+                        color = Color(0xFFC8C5CB),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF504EC3),
+                    unfocusedBorderColor = Color(0xFFC8C5CB),
+                    errorBorderColor = MaterialTheme.colorScheme.error
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                ),
+                isError = uiState.emailError != null
+            )
+            if (uiState.emailError != null) {
+                Text(
+                    text = uiState.emailError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Password Field
+            Text(
+                text = stringResource(R.string.password_label),
+                fontSize = 16.sp,
+                color = Color(0xFF180E25),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = uiState.password,
+                onValueChange = viewModel::onPasswordChange,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.password_placeholder),
+                        fontSize = 16.sp,
+                        color = Color(0xFFC8C5CB),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(8.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Color(0xFF504EC3),
+                    unfocusedBorderColor = Color(0xFFC8C5CB),
+                    errorBorderColor = MaterialTheme.colorScheme.error
+                ),
+                visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val icon = if (uiState.isPasswordVisible) R.drawable.ic_visibility else R.drawable.ic_visibility_off
+                    IconButton(onClick = viewModel::togglePasswordVisibility) {
+                        Icon(painterResource(icon), contentDescription = stringResource(R.string.toggle_password_visibility))
+                    }
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus()
+                        viewModel.submit()
+                    }
+                ),
+                isError = uiState.passwordError != null
+            )
+            if (uiState.passwordError != null) {
+                Text(
+                    text = uiState.passwordError ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Primary Button
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = { viewModel.submit() },
+                    enabled = !uiState.isLoading && uiState.email.isNotBlank() && uiState.password.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(100.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF504EC3),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFF504EC3).copy(alpha = 0.4f)
+                    )
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = stringResource(R.string.login_button),
+                            modifier = Modifier.align(Alignment.Center),
+                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_forward),
+                            contentDescription = stringResource(R.string.login_arrow_icon_desc),
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .size(20.dp)
+                                .padding(end = 20.dp),
+                            tint = Color.White
+                        )
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(24.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Divider with "Or"
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.height(15.dp).fillMaxWidth()
+            ) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(Color(0xFFEFEEF0))
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = stringResource(R.string.or_label),
+                    fontSize = 12.sp,
+                    color = Color(0xFF827D89),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .height(1.dp)
+                        .background(Color(0xFFEFEEF0))
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Secondary Action Button
+            OutlinedButton(
+                onClick = { viewModel.onRegisterClick() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(100.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.White,
+                    contentColor = Color(0xFF504EC3)
+                ),
+                border = BorderStroke(1.dp, Color(0xFF504EC3))
+            ) {
+                Text(
+                    text = stringResource(R.string.register_button),
+                    fontSize = 16.sp,
+                    color = Color(0xFF504EC3),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}

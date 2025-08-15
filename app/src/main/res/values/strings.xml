@@ -3,4 +3,20 @@
     <string name="onboarding_title">Jot Down anything you want to achieve, today or in the future</string>
     <string name="cta_lets_get_started">Let’s Get Started</string>
     <string name="cd_onboarding_illustration">Idea illustration</string>
+    <string name="login_title">Let’s Login</string>
+    <string name="login_subtitle">And notes your idea</string>
+    <string name="email_label">Email Address</string>
+    <string name="email_placeholder">Example: johndoe@gmail.com</string>
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">********</string>
+    <string name="login_button">Login</string>
+    <string name="or_label">Or</string>
+    <string name="register_button">Don’t have any account? Register here</string>
+    <string name="error_invalid_email">Invalid email address</string>
+    <string name="error_invalid_password">Password must be at least 6 characters</string>
+    <string name="error_invalid_credentials">Invalid email or password</string>
+    <string name="error_network">Please check your internet connection.</string>
+    <string name="error_unknown">Something went wrong. Please try again.</string>
+    <string name="login_arrow_icon_desc">Login</string>
+    <string name="toggle_password_visibility">Toggle password visibility</string>
 </resources>
