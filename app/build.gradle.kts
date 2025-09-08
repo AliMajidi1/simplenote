@@ -70,4 +70,5 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.material)
     implementation(libs.converter.gson)
+    implementation("javax.inject:javax.inject:1")
 }
