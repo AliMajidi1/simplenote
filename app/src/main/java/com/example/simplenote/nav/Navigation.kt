@@ -1,30 +1,26 @@
 package com.example.simplenote.nav
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.simplenote.data.TokenStore
-import com.example.simplenote.ui.screens.LoginScreen
-import com.example.simplenote.ui.screens.LoginViewModel
-import com.example.simplenote.ui.screens.OnboardingScreen
-import com.example.simplenote.ui.screens.RegisterScreen
+import com.example.simplenote.ui.screens.*
 import org.koin.androidx.compose.koinViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.runtime.getValue
 
 object Destinations {
     const val Onboarding = "onboarding"
     const val Login = "login"
     const val Register = "register"
     const val Home = "home"
+    const val NoteEdit = "note_edit"
 }
 
 @Composable
@@ -78,12 +74,46 @@ fun AppNavHost(
             )
         }
         composable(Destinations.Home) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Home Screen (Stub)")
-            }
+            val currentBackStackEntry by navController.currentBackStackEntryAsState()
+            val shouldReloadNotes = currentBackStackEntry?.savedStateHandle?.get<Boolean>("shouldReloadNotes") == true
+            com.example.simplenote.ui.screens.HomeScreen(
+                onAddNote = { navController.navigate(Destinations.NoteEdit) },
+                onNoteClick = { note -> navController.navigate("${Destinations.NoteEdit}/${note.id}") },
+                onSettingsClick = { navController.navigate("settings") },
+                shouldReloadNotes = shouldReloadNotes,
+                onReloadConsumed = {
+                    currentBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", false)
+                }
+            )
+        }
+        composable(Destinations.NoteEdit) {
+            NoteEditScreen(
+                noteId = null,
+                onBack = { navController.navigateUp() },
+                onNoteDeleted = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", true)
+                    navController.popBackStack(Destinations.Home, false)
+                },
+                onNoteSaved = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", true)
+                    navController.popBackStack(Destinations.Home, false)
+                }
+            )
+        }
+        composable("${Destinations.NoteEdit}/{noteId}") { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getString("noteId")?.toIntOrNull()
+            NoteEditScreen(
+                noteId = noteId,
+                onBack = { navController.navigateUp() },
+                onNoteDeleted = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", true)
+                    navController.popBackStack(Destinations.Home, false)
+                },
+                onNoteSaved = {
+                    navController.previousBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", true)
+                    navController.popBackStack(Destinations.Home, false)
+                }
+            )
         }
     }
 }

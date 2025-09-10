@@ -70,7 +70,9 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.androidx.material)
     implementation(libs.converter.gson)
-    implementation("javax.inject:javax.inject:1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation(libs.javax.inject)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
 }

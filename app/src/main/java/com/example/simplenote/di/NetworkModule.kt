@@ -6,10 +6,15 @@ import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenAuthenticator
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
+import com.example.simplenote.data.remote.NotesApi
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -31,9 +36,14 @@ val NetworkModule = module {
     single { provideRetrofit(get(), getProperty("BASE_URL")) }
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { AuthRepository(get(), get()) }
+    single { get<Retrofit>().create(NotesApi::class.java) }
+    single { com.example.simplenote.data.NotesRepository(get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
+    viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
+    viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get()) }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 private fun provideOkHttpClient(
     tokenStore: TokenStore,
     authApiProvider: () -> AuthApi,
@@ -43,6 +53,23 @@ private fun provideOkHttpClient(
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor(Interceptor { chain: Interceptor.Chain ->
+            val original = chain.request()
+            val isAuthEndpoint = original.url.encodedPath.startsWith("/api/auth/")
+            if (isAuthEndpoint) {
+                return@Interceptor chain.proceed(original)
+            }
+            val tokens = runBlocking { tokenStore.tokensFlow.first() }
+            val accessToken = tokens?.accessToken
+            if (!accessToken.isNullOrBlank()) {
+                val newRequest = original.newBuilder()
+                    .header("Authorization", "Bearer $accessToken")
+                    .build()
+                chain.proceed(newRequest)
+            } else {
+                chain.proceed(original)
+            }
+        })
         .authenticator(TokenAuthenticator(tokenStore, authApiProvider) {
             GlobalScope.launch {
                 sessionManager.notifySessionExpired()
