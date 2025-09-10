@@ -157,12 +157,11 @@ fun NoteEditScreen(
                 maxLines = 20
             )
         }
+        Divider(color = Color(0xFFE5E5EA), thickness = 1.dp)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
-                .background(Color.White)
-                .padding(start = 12.dp, end = 0.dp, bottom = 0.dp, top = 0.dp),
+                .height(48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -175,14 +174,16 @@ fun NoteEditScreen(
                     }
                 } ?: "-"),
                 color = Color(0xFF191932),
-                fontSize = 13.sp,
-                modifier = Modifier.weight(1f)
+                fontSize = 16.sp,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 24.dp)
             )
             if (noteId != null) {
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(Color(0xFF6C4EE6), shape = RoundedCornerShape(0.dp))
+                        .background(Color(0xFF6C00E6))
                         .clickable { showDeleteDialog = true },
                     contentAlignment = Alignment.Center
                 ) {
