@@ -6,6 +6,7 @@ import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenAuthenticator
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
+import com.example.simplenote.data.remote.NotesApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,7 +33,10 @@ val NetworkModule = module {
     single { provideRetrofit(get(), getProperty("BASE_URL")) }
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { AuthRepository(get(), get()) }
+    single { get<Retrofit>().create(NotesApi::class.java) }
+    single { com.example.simplenote.data.NotesRepository(get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
+    viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
 }
 
 @OptIn(DelicateCoroutinesApi::class)

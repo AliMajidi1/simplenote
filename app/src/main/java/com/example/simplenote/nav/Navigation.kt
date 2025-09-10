@@ -1,14 +1,9 @@
 package com.example.simplenote.nav
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -78,12 +73,11 @@ fun AppNavHost(
             )
         }
         composable(Destinations.Home) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Home Screen (Stub)")
-            }
+            com.example.simplenote.ui.screens.HomeScreen(
+                onAddNote = { /* TODO: Implement add note navigation */ },
+                onNoteClick = { /* TODO: Implement note detail navigation */ },
+                onSettingsClick = { navController.navigate("settings") },
+            )
         }
     }
 }
