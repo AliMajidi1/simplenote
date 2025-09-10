@@ -14,6 +14,8 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 object Destinations {
     const val Onboarding = "onboarding"
@@ -21,6 +23,8 @@ object Destinations {
     const val Register = "register"
     const val Home = "home"
     const val NoteEdit = "note_edit"
+    const val Settings = "settings"
+    const val ChangePassword = "change_password"
 }
 
 @Composable
@@ -79,7 +83,7 @@ fun AppNavHost(
             com.example.simplenote.ui.screens.HomeScreen(
                 onAddNote = { navController.navigate(Destinations.NoteEdit) },
                 onNoteClick = { note -> navController.navigate("${Destinations.NoteEdit}/${note.id}") },
-                onSettingsClick = { navController.navigate("settings") },
+                onSettingsClick = { navController.navigate(Destinations.Settings) },
                 shouldReloadNotes = shouldReloadNotes,
                 onReloadConsumed = {
                     currentBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", false)
@@ -113,6 +117,39 @@ fun AppNavHost(
                     navController.previousBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", true)
                     navController.popBackStack(Destinations.Home, false)
                 }
+            )
+        }
+        composable(Destinations.Settings) {
+            val coroutineScope = rememberCoroutineScope()
+            SettingsScreen(
+                onBack = { navController.navigateUp() },
+                onLogout = {
+                    coroutineScope.launch {
+                        tokenStore.clearTokens()
+                        navController.navigate(Destinations.Login) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                onChangePassword = { navController.navigate(Destinations.ChangePassword) }
+            )
+        }
+        composable(Destinations.ChangePassword) {
+            val viewModel = koinViewModel<ChangePasswordViewModel>()
+            val coroutineScope = rememberCoroutineScope()
+            ChangePasswordScreen(
+                onBack = { navController.navigateUp() },
+                onLogout = {
+                    coroutineScope.launch {
+                        tokenStore.clearTokens()
+                        navController.navigate(Destinations.Login) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                },
+                viewModel = viewModel
             )
         }
     }

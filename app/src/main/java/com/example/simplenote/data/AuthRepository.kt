@@ -63,6 +63,43 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Fetches the current user's profile info.
+     */
+    fun getUserInfo(): Flow<NetworkResult<UserInfoResponse>> = flow {
+        try {
+            val response = api.getUserInfo()
+            emit(NetworkResult.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(e))
+        }
+    }
+
+    /**
+     * Changes the user's password.
+     * Returns NetworkResult for consistent error handling.
+     */
+    suspend fun changePassword(oldPassword: String, newPassword: String): NetworkResult<Unit> {
+        return try {
+            api.changePassword(
+                ChangePasswordRequest(
+                    old_password = oldPassword,
+                    new_password = newPassword
+                )
+            )
+            NetworkResult.Success(Unit)
+        } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
+    /**
+     * Logs out the user by clearing tokens.
+     */
+    suspend fun logout() {
+        tokenStore.clearTokens()
+    }
+
+    /**
      * Handles exceptions and maps them to NetworkResult.
      */
     private fun <T> handleException(e: Exception): NetworkResult<T> {
