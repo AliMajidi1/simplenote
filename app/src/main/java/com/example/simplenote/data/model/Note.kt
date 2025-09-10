@@ -1,15 +1,15 @@
 package com.example.simplenote.data.model
 
-import com.squareup.moshi.Json
+import com.google.gson.annotations.SerializedName
 
 data class Note(
     val id: Int,
     val title: String,
     val description: String,
-    @Json(name = "created_at") val createdAt: String,
-    @Json(name = "updated_at") val updatedAt: String,
-    @Json(name = "creator_name") val creatorName: String,
-    @Json(name = "creator_username") val creatorUsername: String
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("updated_at") val updatedAt: String,
+    @SerializedName("creator_name") val creatorName: String,
+    @SerializedName("creator_username") val creatorUsername: String
 )
 
 data class NoteRequest(
@@ -23,4 +23,3 @@ data class PaginatedNoteList(
     val previous: String?,
     val results: List<Note>
 )
-
