@@ -13,6 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,10 +39,19 @@ fun HomeScreen(
     onAddNote: () -> Unit = {},
     onNoteClick: (Note) -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onHomeClick: () -> Unit = {}
+    onHomeClick: () -> Unit = {},
+    shouldReloadNotes: Boolean = false,
+    onReloadConsumed: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+
+    LaunchedEffect(shouldReloadNotes) {
+        if (shouldReloadNotes) {
+            viewModel.loadNotes(reset = true)
+            onReloadConsumed()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F6FB))) {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 56.dp)) {

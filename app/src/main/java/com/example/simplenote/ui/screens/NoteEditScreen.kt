@@ -41,6 +41,15 @@ fun NoteEditScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showError by remember { mutableStateOf<String?>(null) }
 
+    fun handleBack() {
+        if (uiState !is NoteEditUiState.Loading && uiState !is NoteEditUiState.Deleting) {
+            viewModel.saveNote(
+                onSuccess = onNoteSaved,
+                onError = { showError = it }
+            )
+        }
+    }
+
     LaunchedEffect(noteId) {
         viewModel.loadNote(noteId)
     }
@@ -51,8 +60,8 @@ fun NoteEditScreen(
             confirmButton = {
                 TextButton(onClick = { showError = null }) { Text("OK") }
             },
-            title = { Text("Error") },
-            text = { Text(showError ?: "") }
+            title = { Text("Error", color = Color.Black) },
+            text = { Text(showError ?: "", color = Color.Black) },
         )
     }
 
@@ -96,14 +105,14 @@ fun NoteEditScreen(
                 tint = Color(0xFF6C4EE6),
                 modifier = Modifier
                     .size(20.dp)
-                    .clickable { onBack() }
+                    .clickable { handleBack() }
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "Back",
                 color = Color(0xFF6C4EE6),
                 fontSize = 16.sp,
-                modifier = Modifier.clickable { onBack() }
+                modifier = Modifier.clickable { handleBack() }
             )
         }
         Column(
@@ -205,11 +214,6 @@ fun NoteEditScreen(
         }
     }
     BackHandler(enabled = true) {
-        if (uiState !is NoteEditUiState.Loading && uiState !is NoteEditUiState.Deleting) {
-            viewModel.saveNote(
-                onSuccess = onNoteSaved,
-                onError = { showError = it }
-            )
-        }
+        handleBack()
     }
 }
