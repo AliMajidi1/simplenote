@@ -67,8 +67,16 @@ fun HomeScreen(
                 }
             }
         }
-        HomeFab(onClick = onAddNote)
-        HomeBottomNav(onHomeClick = onHomeClick, onSettingsClick = onSettingsClick)
+        HomeBottomNav(
+            onHomeClick = onHomeClick,
+            onSettingsClick = onSettingsClick
+        )
+        HomeFab(
+            onClick = onAddNote,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .offset(y = (-40).dp)
+        )
     }
 }
 
@@ -177,13 +185,6 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_onboarding_idea),
-                    contentDescription = null,
-                    tint = Color(0xFFFFC700),
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = note.title,
                     fontWeight = FontWeight.Bold,
@@ -203,27 +204,21 @@ fun NoteCard(note: Note, onClick: () -> Unit) {
 }
 
 @Composable
-fun HomeFab(onClick: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
+fun HomeFab(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    FloatingActionButton(
+        onClick = onClick,
+        containerColor = Primary,
+        shape = CircleShape,
+        modifier = modifier
+            .size(64.dp)
+            .shadow(8.dp, CircleShape)
     ) {
-        FloatingActionButton(
-            onClick = onClick,
-            containerColor = Primary,
-            shape = CircleShape,
-            modifier = Modifier
-                .padding(bottom = 32.dp)
-                .size(64.dp)
-                .shadow(8.dp, CircleShape)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add),
-                contentDescription = "Add Note",
-                tint = NeutralWhite,
-                modifier = Modifier.size(32.dp)
-            )
-        }
+        Icon(
+            painter = painterResource(id = R.drawable.ic_add),
+            contentDescription = "Add Note",
+            tint = NeutralWhite,
+            modifier = Modifier.size(32.dp)
+        )
     }
 }
 
@@ -252,7 +247,7 @@ fun HomeBottomNav(onHomeClick: () -> Unit, onSettingsClick: () -> Unit) {
                 )
                 Text("Home", color = Primary, fontSize = 12.sp)
             }
-            Spacer(modifier = Modifier.width(64.dp)) // Space for FAB
+            Spacer(modifier = Modifier.width(160.dp))
             Column(horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable { onSettingsClick() }) {
                 Icon(
