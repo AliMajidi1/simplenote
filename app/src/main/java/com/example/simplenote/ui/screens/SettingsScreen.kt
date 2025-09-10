@@ -38,7 +38,7 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.compose.ui.window.Dialog
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () -> Unit, onLogout: () -> Unit) {
+fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () -> Unit, onLogout: () -> Unit, onChangePassword: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
     val showLogoutDialog = remember { mutableStateOf(false) }
 
@@ -195,7 +195,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* TODO: handle change password */ }
+                .clickable { onChangePassword() }
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -218,8 +218,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () ->
                 modifier = Modifier.size(20.dp)
             )
         }
-
-        HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp))
+        HorizontalDivider()
 
         Row(
             modifier = Modifier

@@ -24,6 +24,7 @@ object Destinations {
     const val Home = "home"
     const val NoteEdit = "note_edit"
     const val Settings = "settings"
+    const val ChangePassword = "change_password"
 }
 
 @Composable
@@ -130,7 +131,15 @@ fun AppNavHost(
                             launchSingleTop = true
                         }
                     }
-                }
+                },
+                onChangePassword = { navController.navigate(Destinations.ChangePassword) }
+            )
+        }
+        composable(Destinations.ChangePassword) {
+            val viewModel = koinViewModel<ChangePasswordViewModel>()
+            ChangePasswordScreen(
+                onBack = { navController.navigateUp() },
+                viewModel = viewModel
             )
         }
     }

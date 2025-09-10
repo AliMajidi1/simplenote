@@ -44,6 +44,15 @@ data class UserInfoResponse(
     val last_name: String
 )
 
+@Serializable
+data class ChangePasswordRequest(
+    val old_password: String,
+    val new_password: String
+)
+
+@Serializable
+data class MessageResponse(val detail: String)
+
 interface AuthApi {
     @POST("/api/auth/token/")
     suspend fun obtainToken(@Body body: TokenObtainPairRequest): TokenObtainPairResponse
@@ -56,6 +65,9 @@ interface AuthApi {
 
     @GET("/api/auth/userinfo/")
     suspend fun getUserInfo(): UserInfoResponse
+
+    @POST("/api/auth/change-password/")
+    suspend fun changePassword(@Body body: ChangePasswordRequest): MessageResponse
 }
 
 sealed interface NetworkResult<out T> {
