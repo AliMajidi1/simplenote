@@ -21,6 +21,7 @@ object Destinations {
     const val Register = "register"
     const val Home = "home"
     const val NoteEdit = "note_edit"
+    const val Settings = "settings"
 }
 
 @Composable
@@ -79,7 +80,7 @@ fun AppNavHost(
             com.example.simplenote.ui.screens.HomeScreen(
                 onAddNote = { navController.navigate(Destinations.NoteEdit) },
                 onNoteClick = { note -> navController.navigate("${Destinations.NoteEdit}/${note.id}") },
-                onSettingsClick = { navController.navigate("settings") },
+                onSettingsClick = { navController.navigate(Destinations.Settings) }, // Use constant
                 shouldReloadNotes = shouldReloadNotes,
                 onReloadConsumed = {
                     currentBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", false)
@@ -114,6 +115,9 @@ fun AppNavHost(
                     navController.popBackStack(Destinations.Home, false)
                 }
             )
+        }
+        composable(Destinations.Settings) {
+            SettingsScreen()
         }
     }
 }
