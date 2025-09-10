@@ -45,7 +45,6 @@ fun HomeScreen(
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F6FB))) {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 80.dp)) {
-            // Always show the search bar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -98,19 +97,15 @@ fun HomeScreen(
                     }
                 }
                 is HomeUiState.Success -> {
-                    val notes = (uiState as HomeUiState.Success).notes
-                    if (notes.isEmpty()) {
-                        if (searchQuery.isBlank()) {
-                            EmptyHomeContent(onAddNote = onAddNote)
-                        } else {
-                            NoSearchResultsContent()
-                        }
-                    } else {
-                        NotesHomeContent(
-                            notes = notes,
-                            onNoteClick = onNoteClick
-                        )
-                    }
+                    val state = uiState as HomeUiState.Success
+                    val notes = state.notes
+                    NotesHomeContent(
+                        notes = notes,
+                        onNoteClick = onNoteClick,
+                        isLoadingMore = state.isLoadingMore,
+                        endReached = state.endReached,
+                        onLoadMore = { viewModel.loadNextPage() }
+                    )
                 }
                 is HomeUiState.Error -> {
                     val message = (uiState as HomeUiState.Error).message
@@ -199,8 +194,17 @@ fun EmptyHomeContent(onAddNote: () -> Unit) {
 @Composable
 fun NotesHomeContent(
     notes: List<Note>,
-    onNoteClick: (Note) -> Unit
+    onNoteClick: (Note) -> Unit,
+    isLoadingMore: Boolean = false,
+    endReached: Boolean = false,
+    onLoadMore: () -> Unit = {}
 ) {
+    val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+    val shouldLoadMore =
+        !endReached && !isLoadingMore && gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index == notes.lastIndex
+    androidx.compose.runtime.LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) onLoadMore()
+    }
     Column(modifier = Modifier
         .fillMaxSize()
         .statusBarsPadding()
@@ -214,6 +218,7 @@ fun NotesHomeContent(
             modifier = Modifier.padding(start = 20.dp, bottom = 8.dp)
         )
         LazyVerticalGrid(
+            state = gridState,
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -222,6 +227,18 @@ fun NotesHomeContent(
         ) {
             items(notes) { note ->
                 NoteCard(note = note, onClick = { onNoteClick(note) })
+            }
+            if (isLoadingMore) {
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Primary, strokeWidth = 2.dp, modifier = Modifier.size(32.dp))
+                    }
+                }
             }
         }
     }
