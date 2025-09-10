@@ -44,7 +44,7 @@ fun HomeScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F6FB))) {
-        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 80.dp)) {
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 56.dp)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,7 +163,7 @@ fun NoSearchResultsContent() {
 @Composable
 fun EmptyHomeContent(onAddNote: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(bottom = 80.dp),
+        modifier = Modifier.fillMaxSize().padding(bottom = 56.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -208,7 +208,7 @@ fun NotesHomeContent(
     Column(modifier = Modifier
         .fillMaxSize()
         .statusBarsPadding()
-        .padding(bottom = 80.dp)) {
+        .padding(bottom = 56.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Notes",
