@@ -9,10 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.simplenote.data.TokenStore
-import com.example.simplenote.ui.screens.LoginScreen
-import com.example.simplenote.ui.screens.LoginViewModel
-import com.example.simplenote.ui.screens.OnboardingScreen
-import com.example.simplenote.ui.screens.RegisterScreen
+import com.example.simplenote.ui.screens.*
 import org.koin.androidx.compose.koinViewModel
 
 object Destinations {
@@ -20,6 +17,7 @@ object Destinations {
     const val Login = "login"
     const val Register = "register"
     const val Home = "home"
+    const val NoteEdit = "note_edit"
 }
 
 @Composable
@@ -74,9 +72,26 @@ fun AppNavHost(
         }
         composable(Destinations.Home) {
             com.example.simplenote.ui.screens.HomeScreen(
-                onAddNote = { /* TODO: Implement add note navigation */ },
-                onNoteClick = { /* TODO: Implement note detail navigation */ },
+                onAddNote = { navController.navigate(Destinations.NoteEdit) },
+                onNoteClick = { note -> navController.navigate("${Destinations.NoteEdit}/${note.id}") },
                 onSettingsClick = { navController.navigate("settings") },
+            )
+        }
+        composable(Destinations.NoteEdit) {
+            NoteEditScreen(
+                noteId = null,
+                onBack = { navController.navigateUp() },
+                onNoteDeleted = { navController.popBackStack(Destinations.Home, false) },
+                onNoteSaved = { navController.popBackStack(Destinations.Home, false) }
+            )
+        }
+        composable("${Destinations.NoteEdit}/{noteId}") { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getString("noteId")?.toIntOrNull()
+            NoteEditScreen(
+                noteId = noteId,
+                onBack = { navController.navigateUp() },
+                onNoteDeleted = { navController.popBackStack(Destinations.Home, false) },
+                onNoteSaved = { navController.popBackStack(Destinations.Home, false) }
             )
         }
     }
