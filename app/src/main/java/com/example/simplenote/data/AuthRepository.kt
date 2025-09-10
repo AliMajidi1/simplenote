@@ -63,6 +63,18 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Fetches the current user's profile info.
+     */
+    fun getUserInfo(): Flow<NetworkResult<UserInfoResponse>> = flow {
+        try {
+            val response = api.getUserInfo()
+            emit(NetworkResult.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(e))
+        }
+    }
+
+    /**
      * Handles exceptions and maps them to NetworkResult.
      */
     private fun <T> handleException(e: Exception): NetworkResult<T> {

@@ -117,7 +117,7 @@ fun AppNavHost(
             )
         }
         composable(Destinations.Settings) {
-            SettingsScreen()
+            SettingsScreen(onBack = { navController.navigateUp() })
         }
     }
 }

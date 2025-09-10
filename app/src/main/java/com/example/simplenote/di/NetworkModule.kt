@@ -41,6 +41,7 @@ val NetworkModule = module {
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get()) }
+    viewModel { com.example.simplenote.ui.screens.SettingsViewModel(get()) }
 }
 
 @OptIn(DelicateCoroutinesApi::class)

@@ -2,6 +2,7 @@ package com.example.simplenote.data.remote
 
 import kotlinx.serialization.Serializable
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 @Serializable
@@ -34,6 +35,15 @@ data class TokenRefreshRequest(val refresh: String)
 @Serializable
 data class TokenRefreshResponse(val access: String)
 
+@Serializable
+data class UserInfoResponse(
+    val id: Int,
+    val username: String,
+    val email: String,
+    val first_name: String,
+    val last_name: String
+)
+
 interface AuthApi {
     @POST("/api/auth/token/")
     suspend fun obtainToken(@Body body: TokenObtainPairRequest): TokenObtainPairResponse
@@ -43,6 +53,9 @@ interface AuthApi {
 
     @POST("/api/auth/token/refresh/")
     suspend fun refreshToken(@Body body: TokenRefreshRequest): TokenRefreshResponse
+
+    @GET("/api/auth/userinfo/")
+    suspend fun getUserInfo(): UserInfoResponse
 }
 
 sealed interface NetworkResult<out T> {
