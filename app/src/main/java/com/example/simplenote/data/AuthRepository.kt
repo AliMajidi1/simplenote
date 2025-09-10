@@ -92,6 +92,13 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Logs out the user by clearing tokens.
+     */
+    suspend fun logout() {
+        tokenStore.clearTokens()
+    }
+
+    /**
      * Handles exceptions and maps them to NetworkResult.
      */
     private fun <T> handleException(e: Exception): NetworkResult<T> {

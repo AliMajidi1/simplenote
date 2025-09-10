@@ -13,6 +13,7 @@ sealed class ChangePasswordUiState {
     object Loading : ChangePasswordUiState()
     data class Success(val message: String) : ChangePasswordUiState()
     data class Error(val error: String) : ChangePasswordUiState()
+    object LoggedOut : ChangePasswordUiState() // Added for logout event
 }
 
 class ChangePasswordViewModel(
@@ -40,7 +41,8 @@ class ChangePasswordViewModel(
         viewModelScope.launch {
             val result = authRepository.changePassword(old, new)
             if (result.isSuccess) {
-                _uiState.value = ChangePasswordUiState.Success("Password changed successfully.")
+                authRepository.logout() // Log out after password change
+                _uiState.value = ChangePasswordUiState.LoggedOut // Emit logout state
             } else {
                 _uiState.value = ChangePasswordUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
             }

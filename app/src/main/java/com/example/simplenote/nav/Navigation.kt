@@ -137,8 +137,18 @@ fun AppNavHost(
         }
         composable(Destinations.ChangePassword) {
             val viewModel = koinViewModel<ChangePasswordViewModel>()
+            val coroutineScope = rememberCoroutineScope()
             ChangePasswordScreen(
                 onBack = { navController.navigateUp() },
+                onLogout = {
+                    coroutineScope.launch {
+                        tokenStore.clearTokens()
+                        navController.navigate(Destinations.Login) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                },
                 viewModel = viewModel
             )
         }
