@@ -2,28 +2,27 @@ package com.example.simplenote.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
 import com.example.simplenote.R
 import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
 import com.example.simplenote.ui.components.PrimaryPillButton
 import org.koin.compose.getKoin
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.remember
 
 @Composable
 fun RegisterScreen(
@@ -52,13 +51,13 @@ fun RegisterScreen(
                 .fillMaxSize()
                 .padding(padding)
                 .padding(start = 16.dp, end = 16.dp, top = 0.dp)
-                .verticalScroll(rememberScrollState()), // Make scrollable
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Top
         ) {
             TextButton(onClick = onBackToLogin) {
                 Text(text = stringResource(R.string.back_to_login))
             }
-            // Remove top Spacer, keep only minimal spacing
+
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.register_title),
@@ -75,9 +74,8 @@ fun RegisterScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 lineHeight = 22.sp
             )
-            Spacer(modifier = Modifier.height(16.dp)) // Reduce space before fields
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // First Name
             Text(
                 text = stringResource(R.string.first_name),
                 fontSize = 16.sp,
@@ -124,7 +122,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Last Name
             Text(
                 text = stringResource(R.string.last_name),
                 fontSize = 16.sp,
@@ -171,7 +168,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Username
             Text(
                 text = stringResource(R.string.username),
                 fontSize = 16.sp,
@@ -218,7 +214,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email
             Text(
                 text = stringResource(R.string.email),
                 fontSize = 16.sp,
@@ -263,7 +258,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password
             Text(
                 text = stringResource(R.string.password),
                 fontSize = 16.sp,
@@ -311,7 +305,6 @@ fun RegisterScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Confirm Password
             Text(
                 text = stringResource(R.string.confirm_password),
                 fontSize = 16.sp,
@@ -357,7 +350,7 @@ fun RegisterScreen(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp)) // Reduce space before Register button
+            Spacer(modifier = Modifier.height(24.dp))
             PrimaryPillButton(
                 text = stringResource(R.string.register_cta),
                 onClick = { viewModel.submit(onRegisterSuccess) },

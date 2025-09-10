@@ -28,12 +28,21 @@ data class RegisterResponse(
     val refresh: String
 )
 
+@Serializable
+data class TokenRefreshRequest(val refresh: String)
+
+@Serializable
+data class TokenRefreshResponse(val access: String)
+
 interface AuthApi {
     @POST("/api/auth/token/")
     suspend fun obtainToken(@Body body: TokenObtainPairRequest): TokenObtainPairResponse
 
     @POST("/api/auth/register/")
     suspend fun register(@Body body: RegisterRequest): RegisterResponse
+
+    @POST("/api/auth/token/refresh/")
+    suspend fun refreshToken(@Body body: TokenRefreshRequest): TokenRefreshResponse
 }
 
 sealed interface NetworkResult<out T> {

@@ -1,23 +1,24 @@
 package com.example.simplenote.nav
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.simplenote.ui.screens.OnboardingScreen
-import androidx.compose.material3.Text
-import androidx.compose.foundation.layout.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import com.example.simplenote.data.TokenStore
 import com.example.simplenote.ui.screens.LoginScreen
 import com.example.simplenote.ui.screens.LoginViewModel
-import org.koin.androidx.compose.koinViewModel
-import androidx.compose.runtime.LaunchedEffect
-import com.example.simplenote.data.TokenStore
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.State
+import com.example.simplenote.ui.screens.OnboardingScreen
 import com.example.simplenote.ui.screens.RegisterScreen
+import org.koin.androidx.compose.koinViewModel
 
 object Destinations {
     const val Onboarding = "onboarding"
@@ -29,13 +30,23 @@ object Destinations {
 @Composable
 fun AppNavHost(
     navController: NavHostController = rememberNavController(),
-    tokenStore: TokenStore
+    tokenStore: TokenStore,
+    shouldNavigateToLogin: MutableState<Boolean>
 ) {
     val tokensState = tokenStore.tokensFlow.collectAsState(initial = null)
     val tokens = tokensState.value
     var startDestination = Destinations.Onboarding
     if (tokens != null) {
         startDestination = Destinations.Home
+    }
+    LaunchedEffect(shouldNavigateToLogin.value) {
+        if (shouldNavigateToLogin.value) {
+            navController.navigate(Destinations.Login) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+            shouldNavigateToLogin.value = false
+        }
     }
     NavHost(
         navController = navController,
