@@ -76,18 +76,19 @@ class AuthRepository @Inject constructor(
 
     /**
      * Changes the user's password.
+     * Returns NetworkResult for consistent error handling.
      */
-    suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit> {
+    suspend fun changePassword(oldPassword: String, newPassword: String): NetworkResult<Unit> {
         return try {
             api.changePassword(
-                com.example.simplenote.data.remote.ChangePasswordRequest(
+                ChangePasswordRequest(
                     old_password = oldPassword,
                     new_password = newPassword
                 )
             )
-            Result.success(Unit)
+            NetworkResult.Success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            handleException(e)
         }
     }
 

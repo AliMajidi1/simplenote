@@ -83,7 +83,7 @@ fun AppNavHost(
             com.example.simplenote.ui.screens.HomeScreen(
                 onAddNote = { navController.navigate(Destinations.NoteEdit) },
                 onNoteClick = { note -> navController.navigate("${Destinations.NoteEdit}/${note.id}") },
-                onSettingsClick = { navController.navigate(Destinations.Settings) }, // Use constant
+                onSettingsClick = { navController.navigate(Destinations.Settings) },
                 shouldReloadNotes = shouldReloadNotes,
                 onReloadConsumed = {
                     currentBackStackEntry?.savedStateHandle?.set("shouldReloadNotes", false)

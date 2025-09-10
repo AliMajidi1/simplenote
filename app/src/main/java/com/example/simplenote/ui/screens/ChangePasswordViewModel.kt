@@ -13,7 +13,7 @@ sealed class ChangePasswordUiState {
     object Loading : ChangePasswordUiState()
     data class Success(val message: String) : ChangePasswordUiState()
     data class Error(val error: String) : ChangePasswordUiState()
-    object LoggedOut : ChangePasswordUiState() // Added for logout event
+    object LoggedOut : ChangePasswordUiState()
 }
 
 class ChangePasswordViewModel(
@@ -39,12 +39,21 @@ class ChangePasswordViewModel(
         }
         _uiState.value = ChangePasswordUiState.Loading
         viewModelScope.launch {
-            val result = authRepository.changePassword(old, new)
-            if (result.isSuccess) {
-                authRepository.logout() // Log out after password change
-                _uiState.value = ChangePasswordUiState.LoggedOut // Emit logout state
-            } else {
-                _uiState.value = ChangePasswordUiState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
+            when (val result = authRepository.changePassword(old, new)) {
+                is com.example.simplenote.data.remote.NetworkResult.Success -> {
+                    authRepository.logout()
+                    _uiState.value = ChangePasswordUiState.LoggedOut
+                }
+                is com.example.simplenote.data.remote.NetworkResult.HttpError -> {
+                    val errorMsg = result.message ?: "Password change failed. Please check your details."
+                    _uiState.value = ChangePasswordUiState.Error(errorMsg)
+                }
+                is com.example.simplenote.data.remote.NetworkResult.NetworkError -> {
+                    _uiState.value = ChangePasswordUiState.Error("Please check your internet connection.")
+                }
+                is com.example.simplenote.data.remote.NetworkResult.UnknownError -> {
+                    _uiState.value = ChangePasswordUiState.Error("Something went wrong. Please try again.")
+                }
             }
         }
     }

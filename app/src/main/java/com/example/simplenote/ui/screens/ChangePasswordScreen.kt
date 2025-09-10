@@ -24,7 +24,7 @@ import com.example.simplenote.ui.theme.Purple700
 @Composable
 fun ChangePasswordScreen(
     onBack: () -> Unit,
-    onLogout: () -> Unit, // Add onLogout callback
+    onLogout: () -> Unit,
     viewModel: ChangePasswordViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -32,10 +32,21 @@ fun ChangePasswordScreen(
     var currentPasswordVisible by remember { mutableStateOf(false) }
     var newPasswordVisible by remember { mutableStateOf(false) }
     var retypePasswordVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState) {
-        if (uiState is ChangePasswordUiState.LoggedOut) {
-            onLogout() // Navigate directly to login
+        when (uiState) {
+            is ChangePasswordUiState.Error -> {
+                snackbarHostState.showSnackbar((uiState as ChangePasswordUiState.Error).error)
+                viewModel.clearError()
+            }
+            is ChangePasswordUiState.Success -> {
+                snackbarHostState.showSnackbar((uiState as ChangePasswordUiState.Success).message)
+            }
+            is ChangePasswordUiState.LoggedOut -> {
+                onLogout()
+            }
+            else -> {}
         }
     }
 
@@ -53,13 +64,14 @@ fun ChangePasswordScreen(
                 modifier = Modifier.statusBarsPadding()
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         backgroundColor = Color.White
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp, vertical = 24.dp), // Increased padding
+                .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.Start
         ) {
             Spacer(modifier = Modifier.height(12.dp))
@@ -68,9 +80,9 @@ fun ChangePasswordScreen(
                 color = Purple700,
                 fontSize = 14.sp
             )
-            Spacer(modifier = Modifier.height(20.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(20.dp))
             Text("Current Password", color = Color.Black, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(10.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = viewModel.currentPassword.collectAsState().value,
                 onValueChange = {
@@ -86,17 +98,17 @@ fun ChangePasswordScreen(
                     backgroundColor = Color.White
                 )
             )
-            Spacer(modifier = Modifier.height(24.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(24.dp))
             Divider()
-            Spacer(modifier = Modifier.height(24.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = "Now, create your new password",
                 color = Purple700,
                 fontSize = 14.sp
             )
-            Spacer(modifier = Modifier.height(20.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(20.dp))
             Text("New Password", color = Color.Black, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(10.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = viewModel.newPassword.collectAsState().value,
                 onValueChange = {
@@ -121,7 +133,7 @@ fun ChangePasswordScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text("Retype New Password", color = Color.Black, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(10.dp)) // Increased spacing
+            Spacer(modifier = Modifier.height(10.dp))
             OutlinedTextField(
                 value = viewModel.retypePassword.collectAsState().value,
                 onValueChange = {
@@ -137,16 +149,7 @@ fun ChangePasswordScreen(
                     backgroundColor = Color.White
                 )
             )
-            Spacer(modifier = Modifier.height(24.dp)) // Increased spacing
-            if (uiState is ChangePasswordUiState.Error) {
-                Text(
-                    text = (uiState as ChangePasswordUiState.Error).error,
-                    color = Color.Red,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 12.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            Spacer(modifier = Modifier.height(24.dp))
             Spacer(modifier = Modifier.weight(1f))
             PrimaryPillButton(
                 text = "Submit New Password",
@@ -161,7 +164,7 @@ fun ChangePasswordScreen(
                 contentColor = Color.White,
                 enabled = uiState !is ChangePasswordUiState.Loading
             )
-            Spacer(modifier = Modifier.height(32.dp)) // Increased bottom spacing
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
