@@ -26,24 +26,24 @@ class SessionManager {
 
 val NetworkModule = module {
     single { SessionManager() }
-    single { provideOkHttpClient(get(), get(), get()) }
+    single { TokenStore(get<Context>()) }
+    single { provideOkHttpClient(get(), { get<AuthApi>() }, get()) }
     single { provideRetrofit(get(), getProperty("BASE_URL")) }
     single { get<Retrofit>().create(AuthApi::class.java) }
-    single { TokenStore(get<Context>()) }
     single { AuthRepository(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
 }
 
 private fun provideOkHttpClient(
     tokenStore: TokenStore,
-    authApi: AuthApi,
+    authApiProvider: () -> AuthApi,
     sessionManager: SessionManager
 ): OkHttpClient {
     val builder = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
-        .authenticator(TokenAuthenticator(tokenStore, authApi) {
+        .authenticator(TokenAuthenticator(tokenStore, authApiProvider) {
             GlobalScope.launch {
                 sessionManager.notifySessionExpired()
             }

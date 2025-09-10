@@ -1,7 +1,6 @@
 package com.example.simplenote
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
@@ -20,15 +19,15 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val tokenStore = get<TokenStore>()
         val sessionManager = get<SessionManager>()
+        val shouldNavigateToLogin = androidx.compose.runtime.mutableStateOf(false)
         setContent {
             SimplenoteTheme {
-                AppNavHost(tokenStore = tokenStore)
+                AppNavHost(tokenStore = tokenStore, shouldNavigateToLogin = shouldNavigateToLogin)
             }
         }
         lifecycleScope.launch {
             sessionManager.sessionExpired.collectLatest { _: Unit ->
-                Toast.makeText(this@MainActivity, "Session expired. Please log in again.", Toast.LENGTH_LONG).show()
-                // TODO: Implement navigation to Login screen (e.g., via NavController or state)
+                shouldNavigateToLogin.value = true
             }
         }
     }

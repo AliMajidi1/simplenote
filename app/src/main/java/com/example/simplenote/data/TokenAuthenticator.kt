@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class TokenAuthenticator(
     private val tokenStore: TokenStore,
-    private val authApi: AuthApi,
+    private val authApiProvider: () -> AuthApi,
     private val onSessionExpired: () -> Unit
 ) : Authenticator {
     @Volatile private var isRefreshing = AtomicBoolean(false)
@@ -43,7 +43,7 @@ class TokenAuthenticator(
                     .build()
             }
             try {
-                val refreshResponse = authApi.refreshToken(TokenRefreshRequest(refresh = refreshToken))
+                val refreshResponse = authApiProvider().refreshToken(TokenRefreshRequest(refresh = refreshToken))
                 tokenStore.setTokens(refreshResponse.access, refreshToken)
                 response.request.newBuilder()
                     .header("Authorization", "Bearer ${refreshResponse.access}")
@@ -69,4 +69,3 @@ class TokenAuthenticator(
         return count
     }
 }
-
