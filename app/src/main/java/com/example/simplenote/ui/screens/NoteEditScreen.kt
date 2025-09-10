@@ -76,30 +76,41 @@ fun NoteEditScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.White)) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .height(56.dp)
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color(0xFF6C4EE6),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, start = 12.dp, end = 12.dp, bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color(0xFF6C4EE6),
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clickable { onBack() }
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Back",
-                    color = Color(0xFF6C4EE6),
-                    fontSize = 16.sp,
-                    modifier = Modifier.clickable { onBack() }
-                )
-            }
+                    .size(20.dp)
+                    .clickable { onBack() }
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Back",
+                color = Color(0xFF6C4EE6),
+                fontSize = 16.sp,
+                modifier = Modifier.clickable { onBack() }
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
                 value = title,
@@ -126,8 +137,7 @@ fun NoteEditScreen(
                 placeholder = { Text("Feel Free to Write Here...", color = Color(0xFFB3B0C6)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 20.dp),
+                    .weight(1f),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -140,33 +150,32 @@ fun NoteEditScreen(
         }
         Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(bottom = 8.dp, start = 12.dp, end = 12.dp),
+                .height(48.dp)
+                .background(Color.White)
+                .padding(start = 12.dp, end = 0.dp, bottom = 0.dp, top = 0.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (lastEdited != null) {
-                val formatted = try {
-                    val dt = LocalDateTime.parse(lastEdited)
-                    dt.format(DateTimeFormatter.ofPattern("HH:mm"))
-                } catch (e: Exception) {
-                    lastEdited
-                }
-                Text(
-                    text = "Last edited on ${formatted ?: "-"}",
-                    color = Color(0xFFB3B0C6),
-                    fontSize = 13.sp,
-                    modifier = Modifier.weight(1f)
-                )
-            } else {
-                Spacer(modifier = Modifier.weight(1f))
-            }
+            Text(
+                text = "Last edited on " + (lastEdited?.let {
+                    try {
+                        val dt = java.time.OffsetDateTime.parse(it)
+                        dt.toLocalTime().format(DateTimeFormatter.ofPattern("HH.mm"))
+                    } catch (e: Exception) {
+                        "-"
+                    }
+                } ?: "-"),
+                color = Color(0xFF191932),
+                fontSize = 13.sp,
+                modifier = Modifier.weight(1f)
+            )
             if (noteId != null) {
-                IconButton(
-                    onClick = { showDeleteDialog = true },
+                Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(Color(0xFF6C4EE6), shape = RoundedCornerShape(12.dp))
+                        .background(Color(0xFF6C4EE6), shape = RoundedCornerShape(0.dp))
+                        .clickable { showDeleteDialog = true },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_delete),
