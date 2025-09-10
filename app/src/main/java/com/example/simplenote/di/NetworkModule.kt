@@ -6,6 +6,7 @@ import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenAuthenticator
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -34,6 +35,7 @@ val NetworkModule = module {
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 private fun provideOkHttpClient(
     tokenStore: TokenStore,
     authApiProvider: () -> AuthApi,
