@@ -25,6 +25,7 @@ import org.koin.androidx.compose.koinViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteEditScreen(
     noteId: Int?,
@@ -66,23 +67,66 @@ fun NoteEditScreen(
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = { showDeleteDialog = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    viewModel.deleteNote(
-                        onSuccess = onNoteDeleted,
-                        onError = { showError = it }
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Want to Delete this Note?",
+                        style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF191932)),
+                        modifier = Modifier.weight(1f)
                     )
-                }) { Text("Delete") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
-            },
-            title = { Text("Delete Note") },
-            text = { Text("Are you sure you want to delete this note?") }
-        )
+                    IconButton(onClick = { showDeleteDialog = false }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_close),
+                            contentDescription = "Close",
+                            tint = Color(0xFFB3B0C6)
+                        )
+                    }
+                }
+                HorizontalDivider(thickness = 1.dp, color = Color(0xFFE5E5EA))
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            showDeleteDialog = false
+                            viewModel.deleteNote(
+                                onSuccess = onNoteDeleted,
+                                onError = { showError = it }
+                            )
+                        }
+                        .padding(horizontal = 20.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_delete),
+                        contentDescription = "Delete Note",
+                        tint = Color(0xFFFF3B30),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Delete Note",
+                        color = Color(0xFFFF3B30),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
     }
 
     Column(
@@ -157,7 +201,7 @@ fun NoteEditScreen(
                 maxLines = 20
             )
         }
-        Divider(color = Color(0xFFE5E5EA), thickness = 1.dp)
+        HorizontalDivider(thickness = 1.dp, color = Color(0xFFE5E5EA))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
