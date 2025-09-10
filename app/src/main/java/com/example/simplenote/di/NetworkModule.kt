@@ -11,7 +11,10 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -49,6 +52,23 @@ private fun provideOkHttpClient(
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor(Interceptor { chain: Interceptor.Chain ->
+            val original = chain.request()
+            val isAuthEndpoint = original.url.encodedPath.startsWith("/api/auth/")
+            if (isAuthEndpoint) {
+                return@Interceptor chain.proceed(original)
+            }
+            val tokens = runBlocking { tokenStore.tokensFlow.first() }
+            val accessToken = tokens?.accessToken
+            if (!accessToken.isNullOrBlank()) {
+                val newRequest = original.newBuilder()
+                    .header("Authorization", "Bearer $accessToken")
+                    .build()
+                chain.proceed(newRequest)
+            } else {
+                chain.proceed(original)
+            }
+        })
         .authenticator(TokenAuthenticator(tokenStore, authApiProvider) {
             GlobalScope.launch {
                 sessionManager.notifySessionExpired()
