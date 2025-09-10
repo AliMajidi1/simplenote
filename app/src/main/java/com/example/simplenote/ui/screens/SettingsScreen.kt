@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -17,6 +18,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,10 +35,12 @@ import com.example.simplenote.data.remote.NetworkResult
 import com.example.simplenote.ui.screens.SettingsViewModel
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.ui.window.Dialog
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () -> Unit) {
+fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () -> Unit, onLogout: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
+    val showLogoutDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchUserInfo()
@@ -49,6 +54,68 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () ->
         }
         is SettingsUiState.Error -> "Error" to state.message
         is SettingsUiState.Loading -> "..." to "..."
+    }
+
+    if (showLogoutDialog.value) {
+        Dialog(onDismissRequest = { showLogoutDialog.value = false }) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = Color.White,
+                tonalElevation = 8.dp,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 28.dp)
+                        .widthIn(min = 280.dp, max = 340.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Log Out",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A)),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = "Are you sure you want to log out from the application?",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF757575)),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(28.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedButton(
+                            onClick = { showLogoutDialog.value = false },
+                            border = ButtonDefaults.outlinedButtonBorder(enabled = true),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF6C47FF)),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        ) {
+                            Text("Cancel", color = Color(0xFF6C47FF))
+                        }
+                        Button(
+                            onClick = {
+                                showLogoutDialog.value = false
+                                onLogout()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6C47FF)),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp)
+                        ) {
+                            Text("Yes", color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Column(
@@ -157,7 +224,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = koinViewModel(), onBack: () ->
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { /* TODO: handle logout */ }
+                .clickable { showLogoutDialog.value = true }
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

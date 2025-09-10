@@ -14,6 +14,8 @@ import org.koin.androidx.compose.koinViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 object Destinations {
     const val Onboarding = "onboarding"
@@ -117,7 +119,19 @@ fun AppNavHost(
             )
         }
         composable(Destinations.Settings) {
-            SettingsScreen(onBack = { navController.navigateUp() })
+            val coroutineScope = rememberCoroutineScope()
+            SettingsScreen(
+                onBack = { navController.navigateUp() },
+                onLogout = {
+                    coroutineScope.launch {
+                        tokenStore.clearTokens()
+                        navController.navigate(Destinations.Login) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            )
         }
     }
 }
