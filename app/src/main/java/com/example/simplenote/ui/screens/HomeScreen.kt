@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,6 +21,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,29 +44,79 @@ fun HomeScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F6FB))) {
-        when (uiState) {
-            is HomeUiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Primary)
-                }
-            }
-            is HomeUiState.Empty -> {
-                EmptyHomeContent(onAddNote = onAddNote)
-            }
-            is HomeUiState.Success -> {
-                val notes = (uiState as HomeUiState.Success).notes
-                NotesHomeContent(
-                    notes = notes,
-                    searchQuery = searchQuery,
-                    onSearchChange = viewModel::onSearchQueryChange,
-                    onAddNote = onAddNote,
-                    onNoteClick = onNoteClick
+        Column(modifier = Modifier.fillMaxSize().statusBarsPadding().padding(bottom = 80.dp)) {
+            // Always show the search bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_search),
+                    contentDescription = null,
+                    tint = Color(0xFFB3B0C6),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                TextField(
+                    value = searchQuery,
+                    onValueChange = viewModel::onSearchQueryChange,
+                    placeholder = { Text("Search...", color = Color(0xFFB3B0C6)) },
+                    textStyle = LocalTextStyle.current.copy(color = NeutralBlack),
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color(0xFFF3F2F7),
+                        focusedContainerColor = Color(0xFFF3F2F7),
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .defaultMinSize(minHeight = 48.dp),
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onSearch = { viewModel.onSearchQueryChange(searchQuery) }
+                    )
                 )
             }
-            is HomeUiState.Error -> {
-                val message = (uiState as HomeUiState.Error).message
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = message, color = Color.Red)
+            Spacer(modifier = Modifier.height(8.dp))
+            when (uiState) {
+                is HomeUiState.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Primary)
+                    }
+                }
+                is HomeUiState.Empty -> {
+                    if (searchQuery.isBlank()) {
+                        EmptyHomeContent(onAddNote = onAddNote)
+                    } else {
+                        NoSearchResultsContent()
+                    }
+                }
+                is HomeUiState.Success -> {
+                    val notes = (uiState as HomeUiState.Success).notes
+                    if (notes.isEmpty()) {
+                        if (searchQuery.isBlank()) {
+                            EmptyHomeContent(onAddNote = onAddNote)
+                        } else {
+                            NoSearchResultsContent()
+                        }
+                    } else {
+                        NotesHomeContent(
+                            notes = notes,
+                            onNoteClick = onNoteClick
+                        )
+                    }
+                }
+                is HomeUiState.Error -> {
+                    val message = (uiState as HomeUiState.Error).message
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = message, color = Color.Red)
+                    }
                 }
             }
         }
@@ -76,6 +129,38 @@ fun HomeScreen(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .offset(y = (-40).dp)
+        )
+    }
+}
+
+@Composable
+fun NoSearchResultsContent() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_search),
+            contentDescription = null,
+            tint = Color(0xFFB3B0C6),
+            modifier = Modifier.size(80.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "No notes found",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            color = NeutralBlack,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Try a different search keyword.",
+            fontSize = 16.sp,
+            color = Color(0xFFB3B0C6),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
         )
     }
 }
@@ -114,43 +199,12 @@ fun EmptyHomeContent(onAddNote: () -> Unit) {
 @Composable
 fun NotesHomeContent(
     notes: List<Note>,
-    searchQuery: String,
-    onSearchChange: (String) -> Unit,
-    onAddNote: () -> Unit,
     onNoteClick: (Note) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(bottom = 80.dp)) {
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_search),
-                contentDescription = null,
-                tint = Color(0xFFB3B0C6),
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            TextField(
-                value = searchQuery,
-                onValueChange = onSearchChange,
-                placeholder = { Text("Search...", color = Color(0xFFB3B0C6)) },
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color(0xFFF3F2F7),
-                    focusedContainerColor = Color(0xFFF3F2F7),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(48.dp),
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp)
-            )
-        }
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .statusBarsPadding()
+        .padding(bottom = 80.dp)) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Notes",
