@@ -4,7 +4,7 @@ import androidx.room.*
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM notes ORDER BY localUpdatedAt DESC")
+    @Query("SELECT * FROM notes")
     suspend fun getAllNotes(): List<NoteEntity>
 
     @Query("SELECT * FROM notes WHERE localId = :localId")
@@ -36,4 +36,7 @@ interface NoteDao {
 
     @Query("UPDATE notes SET syncAction = :syncAction WHERE remoteId = :remoteId")
     suspend fun markNoteForSync(remoteId: Int, syncAction: String)
+
+    @Query("SELECT * FROM notes WHERE localId = :id")
+    suspend fun getNoteById(id: Long): NoteEntity?
 }

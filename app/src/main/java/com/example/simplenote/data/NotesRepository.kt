@@ -66,8 +66,8 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 content = note.description,
                 syncAction = "CREATE"
             )
-            noteDao.insertNote(entity)
-            null
+            val id = noteDao.insertNote(entity)
+            noteDao.getNoteById(id)?.toNote()
         }
     }
 
@@ -104,8 +104,10 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
             )
             if (entity != null) {
                 noteDao.insertNote(entity)
+                entity.toNote()
+            } else {
+                null
             }
-            null
         }
     }
 
@@ -120,7 +122,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
             }
         } catch (e: Exception) {
             noteDao.markNoteForSync(id, "DELETE")
-            false
+            true
         }
     }
 }

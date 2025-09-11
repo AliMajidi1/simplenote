@@ -24,6 +24,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import androidx.room.Room
 
 class SessionManager {
     private val _sessionExpired = MutableSharedFlow<Unit>(replay = 1)
@@ -39,6 +40,9 @@ val NetworkModule = module {
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { AuthRepository(get(), get()) }
     single { get<Retrofit>().create(NotesApi::class.java) }
+    single {
+        Room.databaseBuilder(get<Context>(), AppDatabase::class.java, "notes_db").build()
+    }
     single { get<AppDatabase>().noteDao() }
     single { com.example.simplenote.data.NotesRepository(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
