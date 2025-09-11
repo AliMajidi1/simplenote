@@ -25,11 +25,11 @@ data class NoteEntity(
     val isSynced: Boolean = false,
     val isDeleted: Boolean = false,
     val remoteId: Int? = null,
+    val localId: Int? = null,
     val remoteUpdatedAt: Long? = null,
     val localUpdatedAt: Long = System.currentTimeMillis(),
     val syncAction: String? = null,
     val hasConflict: Boolean = false,
-    val localId: Int? = null
 )
 
 @Database(entities = [NoteEntity::class], version = 1, exportSchema = false)
