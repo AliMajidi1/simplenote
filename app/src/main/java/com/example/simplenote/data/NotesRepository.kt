@@ -29,9 +29,6 @@ class NotesRepository(private val notesApi: NotesApi) {
     suspend fun updateNote(id: Int, note: NoteRequest): Response<Note> =
         notesApi.updateNote(id, note)
 
-    suspend fun patchNote(id: Int, fields: Map<String, Any?>): Response<Note> =
-        notesApi.patchNote(id, fields)
-
     suspend fun deleteNote(id: Int): Response<Unit> =
         notesApi.deleteNote(id)
 }
