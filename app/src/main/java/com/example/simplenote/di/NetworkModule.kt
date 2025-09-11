@@ -5,6 +5,7 @@ import com.example.simplenote.BuildConfig
 import com.example.simplenote.data.AuthRepository
 import com.example.simplenote.data.TokenAuthenticator
 import com.example.simplenote.data.TokenStore
+import com.example.simplenote.data.local.AppDatabase
 import com.example.simplenote.data.remote.AuthApi
 import com.example.simplenote.data.remote.NotesApi
 import io.sentry.okhttp.SentryOkHttpInterceptor
@@ -23,6 +24,7 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
+import androidx.room.Room
 
 class SessionManager {
     private val _sessionExpired = MutableSharedFlow<Unit>(replay = 1)
@@ -38,7 +40,13 @@ val NetworkModule = module {
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { AuthRepository(get(), get()) }
     single { get<Retrofit>().create(NotesApi::class.java) }
-    single { com.example.simplenote.data.NotesRepository(get()) }
+    single {
+        Room.databaseBuilder(get<Context>(), AppDatabase::class.java, "notes_db")
+            .fallbackToDestructiveMigration(true)
+            .build()
+    }
+    single { get<AppDatabase>().noteDao() }
+    single { com.example.simplenote.data.NotesRepository(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get()) }

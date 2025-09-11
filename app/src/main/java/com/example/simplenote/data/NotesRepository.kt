@@ -1,14 +1,31 @@
 package com.example.simplenote.data
 
+import com.example.simplenote.data.local.NoteDao
+import com.example.simplenote.data.local.NoteEntity
+import com.example.simplenote.data.local.toEntity
+import com.example.simplenote.data.local.toNote
 import com.example.simplenote.data.model.Note
 import com.example.simplenote.data.model.NoteRequest
-import com.example.simplenote.data.model.PaginatedNoteList
 import com.example.simplenote.data.remote.NotesApi
-import retrofit2.Response
 
-class NotesRepository(private val notesApi: NotesApi) {
-    suspend fun getNotes(page: Int? = null, pageSize: Int? = null): Response<PaginatedNoteList> =
-        notesApi.getNotes(page, pageSize)
+class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteDao) {
+    suspend fun getNotes(page: Int? = null, pageSize: Int? = null): List<Note> {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.getNotes(page, pageSize)
+            if (response.isSuccessful) {
+                response.body()?.results?.map { note ->
+                    val entity = note.toEntity()
+                    noteDao.insertNote(entity)
+                    note
+                } ?: emptyList()
+            } else {
+                noteDao.getAllNotes().map { it.toNote() }
+            }
+        } catch (e: Exception) {
+            noteDao.getAllNotes().map { it.toNote() }
+        }
+    }
 
     suspend fun filterNotes(
         title: String? = null,
@@ -17,22 +34,157 @@ class NotesRepository(private val notesApi: NotesApi) {
         updatedLte: String? = null,
         page: Int? = null,
         pageSize: Int? = null
-    ): Response<PaginatedNoteList> =
-        notesApi.filterNotes(title, description, updatedGte, updatedLte, page, pageSize)
+    ): List<Note> {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.filterNotes(title, description, updatedGte, updatedLte, page, pageSize)
+            if (response.isSuccessful) {
+                response.body()?.results?.map { note ->
+                    val entity = note.toEntity()
+                    noteDao.insertNote(entity)
+                    note
+                } ?: emptyList()
+            } else {
+                noteDao.filterNotes(title, description).map { it.toNote() }
+            }
+        } catch (e: Exception) {
+            noteDao.filterNotes(title, description).map { it.toNote() }
+        }
+    }
 
-    suspend fun createNote(note: NoteRequest): Response<Note> =
-        notesApi.createNote(note)
+    suspend fun createNote(note: NoteRequest): Note? {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.createNote(note)
+            if (response.isSuccessful) {
+                val createdNote = response.body()!!
+                noteDao.insertNote(createdNote.toEntity())
+                createdNote
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            val entity = NoteEntity(
+                title = note.title,
+                content = note.description,
+                syncAction = "CREATE"
+            )
+            val id = noteDao.insertNote(entity)
+            noteDao.getNoteById(id)?.toNote()
+        }
+    }
 
-    suspend fun getNote(id: Int): Response<Note> =
-        notesApi.getNote(id)
+    suspend fun getNote(id: Int): Note? {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.getNote(id)
+            if (response.isSuccessful) {
+                val note = response.body()!!
+                noteDao.insertNote(note.toEntity())
+                note
+            } else {
+                noteDao.getNoteByRemoteId(id)?.toNote()
+            }
+        } catch (e: Exception) {
+            noteDao.getNoteByRemoteId(id)?.toNote()
+        }
+    }
 
-    suspend fun updateNote(id: Int, note: NoteRequest): Response<Note> =
-        notesApi.updateNote(id, note)
+    suspend fun updateNote(id: Int, note: NoteRequest): Note? {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.updateNote(id, note)
+            if (response.isSuccessful) {
+                val updatedNote = response.body()!!
+                noteDao.insertNote(updatedNote.toEntity())
+                updatedNote
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            val entity = noteDao.getNoteByRemoteId(id)?.copy(
+                title = note.title,
+                content = note.description,
+                syncAction = "UPDATE"
+            )
+            if (entity != null) {
+                noteDao.insertNote(entity)
+                entity.toNote()
+            } else {
+                null
+            }
+        }
+    }
 
-    suspend fun patchNote(id: Int, fields: Map<String, Any?>): Response<Note> =
-        notesApi.patchNote(id, fields)
+    suspend fun deleteNote(id: Int): Boolean {
+        syncPendingNotes()
+        return try {
+            val response = notesApi.deleteNote(id)
+            if (response.isSuccessful) {
+                noteDao.deleteNoteByRemoteId(id)
+                true
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            noteDao.markNoteForSync(id, "DELETE")
+            true
+        }
+    }
 
-    suspend fun deleteNote(id: Int): Response<Unit> =
-        notesApi.deleteNote(id)
+    suspend fun syncPendingNotes() {
+        val pendingNotes = noteDao.getNotesWithSyncAction()
+        for (note in pendingNotes) {
+            try {
+                when (note.syncAction) {
+                    "CREATE" -> {
+                        val request = NoteRequest(
+                            title = note.title,
+                            description = note.content
+                        )
+                        val response = notesApi.createNote(request)
+                        if (response.isSuccessful) {
+                            val createdNote = response.body()!!
+                            val updatedEntity = note.copy(
+                                remoteId = createdNote.id,
+                                remoteUpdatedAt = createdNote.updatedAt,
+                                remoteCreatedAt = createdNote.createdAt,
+                                syncAction = null
+                            )
+                            noteDao.insertNote(updatedEntity)
+                        }
+                    }
+                    "UPDATE" -> {
+                        val remoteId = note.remoteId
+                        if (remoteId != null) {
+                            val request = NoteRequest(
+                                title = note.title,
+                                description = note.content
+                            )
+                            val response = notesApi.updateNote(remoteId, request)
+                            if (response.isSuccessful) {
+                                val updatedEntity = note.copy(
+                                    remoteUpdatedAt = response.body()?.updatedAt,
+                                    syncAction = null
+                                )
+                                noteDao.insertNote(updatedEntity)
+                            }
+                        }
+                    }
+                    "DELETE" -> {
+                        val remoteId = note.remoteId
+                        if (remoteId != null) {
+                            val response = notesApi.deleteNote(remoteId)
+                            if (response.isSuccessful) {
+                                noteDao.deleteNoteByRemoteId(remoteId)
+                            }
+                        } else {
+                            note.localId?.let { noteDao.deleteNoteByLocalId(it) }
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
 }
-
