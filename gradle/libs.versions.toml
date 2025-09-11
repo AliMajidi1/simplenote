@@ -27,6 +27,8 @@ javaxInject = "1"
 kotlinxCoroutinesCore = "1.8.1"
 kotlinxCoroutinesAndroid = "1.8.1"
 roomRuntime = "2.8.0"
+roomKtx = "2.8.0"
+workRuntime = "2.10.4"
 sentryAndroid = "8.21.1"
 sentryOkhttp = "8.21.1"
 
@@ -39,6 +41,8 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntime" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
