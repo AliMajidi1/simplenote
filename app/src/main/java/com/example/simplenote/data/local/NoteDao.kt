@@ -19,6 +19,9 @@ interface NoteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotes(notes: List<NoteEntity>)
+
     @Update
     suspend fun updateNote(note: NoteEntity)
 
@@ -30,4 +33,7 @@ interface NoteDao {
 
     @Query("DELETE FROM notes WHERE remoteId = :remoteId")
     suspend fun deleteNoteByRemoteId(remoteId: Int)
+
+    @Query("UPDATE notes SET syncAction = :syncAction WHERE remoteId = :remoteId")
+    suspend fun markNoteForSync(remoteId: Int, syncAction: String)
 }
