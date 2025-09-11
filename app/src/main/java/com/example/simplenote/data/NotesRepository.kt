@@ -10,6 +10,7 @@ import com.example.simplenote.data.remote.NotesApi
 
 class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteDao) {
     suspend fun getNotes(page: Int? = null, pageSize: Int? = null): List<Note> {
+        syncPendingNotes()
         return try {
             val response = notesApi.getNotes(page, pageSize)
             if (response.isSuccessful) {
@@ -34,6 +35,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
         page: Int? = null,
         pageSize: Int? = null
     ): List<Note> {
+        syncPendingNotes()
         return try {
             val response = notesApi.filterNotes(title, description, updatedGte, updatedLte, page, pageSize)
             if (response.isSuccessful) {
@@ -51,6 +53,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun createNote(note: NoteRequest): Note? {
+        syncPendingNotes()
         return try {
             val response = notesApi.createNote(note)
             if (response.isSuccessful) {
@@ -72,6 +75,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun getNote(id: Int): Note? {
+        syncPendingNotes()
         return try {
             val response = notesApi.getNote(id)
             if (response.isSuccessful) {
@@ -87,6 +91,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun updateNote(id: Int, note: NoteRequest): Note? {
+        syncPendingNotes()
         return try {
             val response = notesApi.updateNote(id, note)
             if (response.isSuccessful) {
@@ -112,6 +117,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun deleteNote(id: Int): Boolean {
+        syncPendingNotes()
         return try {
             val response = notesApi.deleteNote(id)
             if (response.isSuccessful) {

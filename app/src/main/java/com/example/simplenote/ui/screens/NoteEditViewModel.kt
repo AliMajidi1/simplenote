@@ -69,7 +69,7 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
         val title = _title.value.trim()
         val desc = _description.value.trim()
         if (title.isBlank()) {
-            onError("Title cannot be empty")
+            onSuccess()
             return
         }
         _uiState.value = NoteEditUiState.Saving
