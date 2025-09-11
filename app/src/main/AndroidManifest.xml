@@ -15,6 +15,9 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Simplenote"
             android:networkSecurityConfig="@xml/network_security_config">
+        <meta-data android:name="io.sentry.dsn"
+                   android:value="https://64dd080d27059aae86cca218d089123b@o4510000372121600.ingest.de.sentry.io/4510000376119376" />
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"

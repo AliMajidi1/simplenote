@@ -7,6 +7,7 @@ import com.example.simplenote.data.TokenAuthenticator
 import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.remote.AuthApi
 import com.example.simplenote.data.remote.NotesApi
+import io.sentry.okhttp.SentryOkHttpInterceptor
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,6 +56,7 @@ private fun provideOkHttpClient(
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
+        .addInterceptor(SentryOkHttpInterceptor())
         .addInterceptor(Interceptor { chain: Interceptor.Chain ->
             val original = chain.request()
             val isAuthEndpoint = original.url.encodedPath.startsWith("/api/auth/")
