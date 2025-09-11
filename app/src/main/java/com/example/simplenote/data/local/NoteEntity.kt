@@ -15,6 +15,7 @@ import androidx.room.RoomDatabase
  * - localUpdatedAt: last-updated timestamp recorded locally (epoch millis)
  * - syncAction: pending action to perform on the server (CREATE/UPDATE/DELETE) when syncing
  * - hasConflict: whether this note currently has a sync conflict between local and remote
+ * - localId: optional numeric id used to represent locally-created notes in UI routing (negative integer)
  */
 @Entity(tableName = "notes")
 data class NoteEntity(
@@ -27,7 +28,8 @@ data class NoteEntity(
     val remoteUpdatedAt: Long? = null,
     val localUpdatedAt: Long = System.currentTimeMillis(),
     val syncAction: String? = null,
-    val hasConflict: Boolean = false
+    val hasConflict: Boolean = false,
+    val localId: Int? = null
 )
 
 @Database(entities = [NoteEntity::class], version = 1, exportSchema = false)
