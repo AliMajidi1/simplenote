@@ -31,4 +31,12 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        val notesRepository = get<com.example.simplenote.data.NotesRepository>()
+        lifecycleScope.launch {
+            notesRepository.syncPendingNotes()
+        }
+    }
 }

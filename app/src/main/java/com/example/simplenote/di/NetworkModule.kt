@@ -41,7 +41,9 @@ val NetworkModule = module {
     single { AuthRepository(get(), get()) }
     single { get<Retrofit>().create(NotesApi::class.java) }
     single {
-        Room.databaseBuilder(get<Context>(), AppDatabase::class.java, "notes_db").build()
+        Room.databaseBuilder(get<Context>(), AppDatabase::class.java, "notes_db")
+            .fallbackToDestructiveMigration()
+            .build()
     }
     single { get<AppDatabase>().noteDao() }
     single { com.example.simplenote.data.NotesRepository(get(), get()) }

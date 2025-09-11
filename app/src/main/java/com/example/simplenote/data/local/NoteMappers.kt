@@ -8,7 +8,7 @@ fun Note.toEntity(): NoteEntity = NoteEntity(
     content = description,
     remoteId = id,
     remoteUpdatedAt = updatedAt,
-    localUpdatedAt = null,
+    remoteCreatedAt = createdAt,
     syncAction = null
 )
 
@@ -16,8 +16,8 @@ fun NoteEntity.toNote(): Note = Note(
     id = remoteId ?: -1,
     title = title,
     description = content,
-    createdAt = remoteUpdatedAt ?: localUpdatedAt ?: "",
-    updatedAt = remoteUpdatedAt ?: localUpdatedAt ?: "",
+    createdAt = remoteCreatedAt ?: "",
+    updatedAt = remoteUpdatedAt ?: "",
     creatorName = "",
     creatorUsername = ""
 )

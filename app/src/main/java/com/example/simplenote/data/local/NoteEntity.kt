@@ -19,6 +19,7 @@ data class NoteEntity(
     val content: String,
     val remoteId: Int? = null,
     val remoteUpdatedAt: String? = null,
+    val remoteCreatedAt: String? = null,
     val syncAction: String? = null,
 )
 

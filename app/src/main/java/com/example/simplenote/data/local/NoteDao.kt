@@ -13,7 +13,7 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE remoteId = :remoteId")
     suspend fun getNoteByRemoteId(remoteId: Int): NoteEntity?
 
-    @Query("SELECT * FROM notes WHERE (:title IS NULL OR title LIKE '%' || :title || '%') AND (:description IS NULL OR content LIKE '%' || :description || '%') ORDER BY localUpdatedAt DESC")
+    @Query("SELECT * FROM notes WHERE (:title IS NULL OR title LIKE '%' || :title || '%') AND (:description IS NULL OR content LIKE '%' || :description || '%')")
     suspend fun filterNotes(title: String?, description: String?): List<NoteEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -39,4 +39,7 @@ interface NoteDao {
 
     @Query("SELECT * FROM notes WHERE localId = :id")
     suspend fun getNoteById(id: Long): NoteEntity?
+
+    @Query("SELECT * FROM notes WHERE syncAction IS NOT NULL")
+    suspend fun getNotesWithSyncAction(): List<NoteEntity>
 }

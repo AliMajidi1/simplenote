@@ -125,4 +125,59 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
             true
         }
     }
+
+    suspend fun syncPendingNotes() {
+        val pendingNotes = noteDao.getNotesWithSyncAction()
+        for (note in pendingNotes) {
+            try {
+                when (note.syncAction) {
+                    "CREATE" -> {
+                        val request = NoteRequest(
+                            title = note.title,
+                            description = note.content
+                        )
+                        val response = notesApi.createNote(request)
+                        if (response.isSuccessful) {
+                            val createdNote = response.body()!!
+                            val updatedEntity = note.copy(
+                                remoteId = createdNote.id,
+                                remoteUpdatedAt = createdNote.updatedAt,
+                                syncAction = null
+                            )
+                            noteDao.insertNote(updatedEntity)
+                        }
+                    }
+                    "UPDATE" -> {
+                        val remoteId = note.remoteId
+                        if (remoteId != null) {
+                            val request = NoteRequest(
+                                title = note.title,
+                                description = note.content
+                            )
+                            val response = notesApi.updateNote(remoteId, request)
+                            if (response.isSuccessful) {
+                                val updatedEntity = note.copy(
+                                    remoteUpdatedAt = response.body()?.updatedAt,
+                                    syncAction = null
+                                )
+                                noteDao.insertNote(updatedEntity)
+                            }
+                        }
+                    }
+                    "DELETE" -> {
+                        val remoteId = note.remoteId
+                        if (remoteId != null) {
+                            val response = notesApi.deleteNote(remoteId)
+                            if (response.isSuccessful) {
+                                noteDao.deleteNoteByRemoteId(remoteId)
+                            }
+                        } else {
+                            note.localId?.let { noteDao.deleteNoteByLocalId(it) }
+                        }
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
 }
