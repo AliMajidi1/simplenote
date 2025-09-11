@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.sentry.android)
     implementation(libs.sentry.okhttp)
     implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.work.runtime.ktx)
+    ksp(libs.androidx.room.compiler)
 }
