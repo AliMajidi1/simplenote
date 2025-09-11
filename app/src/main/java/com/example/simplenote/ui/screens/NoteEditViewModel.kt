@@ -42,19 +42,14 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
         _uiState.value = NoteEditUiState.Loading
         viewModelScope.launch {
             try {
-                val response = notesRepository.getNote(id)
-                if (response.isSuccessful) {
-                    val note = response.body()
-                    if (note != null) {
-                        _title.value = note.title
-                        _description.value = note.description
-                        _lastEdited.value = note.updatedAt
-                        _uiState.value = NoteEditUiState.Success(note)
-                    } else {
-                        _uiState.value = NoteEditUiState.Error("Note not found")
-                    }
+                val note = notesRepository.getNote(id)
+                if (note != null) {
+                    _title.value = note.title
+                    _description.value = note.description
+                    _lastEdited.value = note.updatedAt
+                    _uiState.value = NoteEditUiState.Success(note)
                 } else {
-                    _uiState.value = NoteEditUiState.Error("Failed to load note")
+                    _uiState.value = NoteEditUiState.Error("Note not found")
                 }
             } catch (e: Exception) {
                 _uiState.value = NoteEditUiState.Error(e.message ?: "Unknown error")
@@ -81,13 +76,13 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
         viewModelScope.launch {
             try {
                 val request = NoteRequest(title, desc)
-                val response = if (noteId == null) {
+                val note = if (noteId == null) {
                     notesRepository.createNote(request)
                 } else {
                     notesRepository.updateNote(noteId!!, request)
                 }
-                if (response.isSuccessful) {
-                    _uiState.value = NoteEditUiState.Success(response.body())
+                if (note != null) {
+                    _uiState.value = NoteEditUiState.Success(note)
                     onSuccess()
                 } else {
                     _uiState.value = NoteEditUiState.Error("Failed to save note")
@@ -105,8 +100,8 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
         _uiState.value = NoteEditUiState.Deleting
         viewModelScope.launch {
             try {
-                val response = notesRepository.deleteNote(id)
-                if (response.isSuccessful) {
+                val success = notesRepository.deleteNote(id)
+                if (success) {
                     _uiState.value = NoteEditUiState.Success(null)
                     onSuccess()
                 } else {

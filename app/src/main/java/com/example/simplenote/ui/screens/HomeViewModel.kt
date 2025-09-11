@@ -24,11 +24,11 @@ class HomeViewModel(private val notesRepository: NotesRepository) : ViewModel() 
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     private var currentPage = 1
-    private var totalPages = 1
     private var isLoadingMore = false
     private var lastQuery: String? = null
     private val pageSize = 10
     private var allNotes: MutableList<Note> = mutableListOf()
+    private var endReached = false
 
     init {
         loadNotes(reset = true)
@@ -38,27 +38,19 @@ class HomeViewModel(private val notesRepository: NotesRepository) : ViewModel() 
         viewModelScope.launch {
             if (reset) {
                 currentPage = 1
-                totalPages = 1
                 allNotes.clear()
+                endReached = false
                 _uiState.value = HomeUiState.Loading
             } else {
                 isLoadingMore = true
                 _uiState.value = HomeUiState.Success(allNotes, isLoadingMore = true, endReached = false)
             }
             try {
-                val response = notesRepository.getNotes(page = currentPage, pageSize = pageSize)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val notes = body?.results ?: emptyList()
-                    val count = body?.count ?: 0
-                    totalPages = if (pageSize > 0) (count + pageSize - 1) / pageSize else 1
-                    if (reset) allNotes.clear()
-                    allNotes.addAll(notes)
-                    val endReached = currentPage >= totalPages || notes.isEmpty()
-                    _uiState.value = if (allNotes.isEmpty()) HomeUiState.Empty else HomeUiState.Success(allNotes, isLoadingMore = false, endReached = endReached)
-                } else {
-                    _uiState.value = HomeUiState.Error("Failed to load notes")
-                }
+                val notes = notesRepository.getNotes(page = currentPage, pageSize = pageSize)
+                if (reset) allNotes.clear()
+                allNotes.addAll(notes)
+                endReached = notes.size < pageSize
+                _uiState.value = if (allNotes.isEmpty()) HomeUiState.Empty else HomeUiState.Success(allNotes, isLoadingMore = false, endReached = endReached)
             } catch (e: Exception) {
                 _uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
             } finally {
@@ -69,7 +61,7 @@ class HomeViewModel(private val notesRepository: NotesRepository) : ViewModel() 
 
     fun loadNextPage() {
         if (isLoadingMore) return
-        if (currentPage >= totalPages) return
+        if (endReached) return
         currentPage++
         val query = lastQuery ?: ""
         if (query.isBlank()) {
@@ -83,8 +75,8 @@ class HomeViewModel(private val notesRepository: NotesRepository) : ViewModel() 
         _searchQuery.value = query
         lastQuery = query
         currentPage = 1
-        totalPages = 1
         allNotes.clear()
+        endReached = false
         searchNotes(query, append = false)
     }
 
@@ -94,25 +86,17 @@ class HomeViewModel(private val notesRepository: NotesRepository) : ViewModel() 
                 _uiState.value = HomeUiState.Loading
                 allNotes.clear()
                 currentPage = 1
-                totalPages = 1
+                endReached = false
             } else {
                 isLoadingMore = true
                 _uiState.value = HomeUiState.Success(allNotes, isLoadingMore = true, endReached = false)
             }
             try {
-                val response = notesRepository.filterNotes(title = query, page = currentPage, pageSize = pageSize)
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val notes = body?.results ?: emptyList()
-                    val count = body?.count ?: 0
-                    totalPages = if (pageSize > 0) (count + pageSize - 1) / pageSize else 1
-                    if (!append) allNotes.clear()
-                    allNotes.addAll(notes)
-                    val endReached = currentPage >= totalPages || notes.isEmpty()
-                    _uiState.value = if (allNotes.isEmpty()) HomeUiState.Empty else HomeUiState.Success(allNotes, isLoadingMore = false, endReached = endReached)
-                } else {
-                    _uiState.value = HomeUiState.Error("Failed to search notes")
-                }
+                val notes = notesRepository.filterNotes(title = query, page = currentPage, pageSize = pageSize)
+                if (!append) allNotes.clear()
+                allNotes.addAll(notes)
+                endReached = notes.size < pageSize
+                _uiState.value = if (allNotes.isEmpty()) HomeUiState.Empty else HomeUiState.Success(allNotes, isLoadingMore = false, endReached = endReached)
             } catch (e: Exception) {
                 _uiState.value = HomeUiState.Error(e.message ?: "Unknown error")
             } finally {
