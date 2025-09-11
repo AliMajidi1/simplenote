@@ -142,6 +142,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                             val updatedEntity = note.copy(
                                 remoteId = createdNote.id,
                                 remoteUpdatedAt = createdNote.updatedAt,
+                                remoteCreatedAt = createdNote.createdAt,
                                 syncAction = null
                             )
                             noteDao.insertNote(updatedEntity)

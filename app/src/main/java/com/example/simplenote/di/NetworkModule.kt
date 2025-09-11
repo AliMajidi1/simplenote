@@ -42,7 +42,7 @@ val NetworkModule = module {
     single { get<Retrofit>().create(NotesApi::class.java) }
     single {
         Room.databaseBuilder(get<Context>(), AppDatabase::class.java, "notes_db")
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration(true)
             .build()
     }
     single { get<AppDatabase>().noteDao() }
