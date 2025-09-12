@@ -13,7 +13,10 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
 
     suspend fun getNotes(page: Int? = null, pageSize: Int? = null): List<Note> {
         if (isOffline) {
-            return noteDao.getAllNotes().map { it.toNote() }
+            val actualPage = page ?: 1
+            val actualPageSize = pageSize ?: 10
+            val offset = (actualPage - 1) * actualPageSize
+            return noteDao.getAllNotes(actualPageSize, offset).map { it.toNote() }
         }
         return try {
             val response = notesApi.getNotes(page, pageSize)
@@ -25,11 +28,17 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 } ?: emptyList()
             } else {
                 isOffline = true
-                noteDao.getAllNotes().map { it.toNote() }
+                val actualPage = page ?: 1
+                val actualPageSize = pageSize ?: 10
+                val offset = (actualPage - 1) * actualPageSize
+                noteDao.getAllNotes(actualPageSize, offset).map { it.toNote() }
             }
         } catch (e: Exception) {
             isOffline = true
-            noteDao.getAllNotes().map { it.toNote() }
+            val actualPage = page ?: 1
+            val actualPageSize = pageSize ?: 10
+            val offset = (actualPage - 1) * actualPageSize
+            noteDao.getAllNotes(actualPageSize, offset).map { it.toNote() }
         }
     }
 
@@ -42,7 +51,10 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
         pageSize: Int? = null
     ): List<Note> {
         if (isOffline) {
-            return noteDao.filterNotes(title, description).map { it.toNote() }
+            val actualPage = page ?: 1
+            val actualPageSize = pageSize ?: 10
+            val offset = (actualPage - 1) * actualPageSize
+            return noteDao.filterNotes(title, description, actualPageSize, offset).map { it.toNote() }
         }
         return try {
             val response = notesApi.filterNotes(title, description, updatedGte, updatedLte, page, pageSize)
@@ -54,11 +66,17 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 } ?: emptyList()
             } else {
                 isOffline = true
-                noteDao.filterNotes(title, description).map { it.toNote() }
+                val actualPage = page ?: 1
+                val actualPageSize = pageSize ?: 10
+                val offset = (actualPage - 1) * actualPageSize
+                noteDao.filterNotes(title, description, actualPageSize, offset).map { it.toNote() }
             }
         } catch (e: Exception) {
             isOffline = true
-            noteDao.filterNotes(title, description).map { it.toNote() }
+            val actualPage = page ?: 1
+            val actualPageSize = pageSize ?: 10
+            val offset = (actualPage - 1) * actualPageSize
+            noteDao.filterNotes(title, description, actualPageSize, offset).map { it.toNote() }
         }
     }
 

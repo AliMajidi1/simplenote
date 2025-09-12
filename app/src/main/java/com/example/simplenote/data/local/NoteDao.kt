@@ -4,8 +4,8 @@ import androidx.room.*
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM notes")
-    suspend fun getAllNotes(): List<NoteEntity>
+    @Query("SELECT * FROM notes LIMIT :pageSize OFFSET :offset")
+    suspend fun getAllNotes(pageSize: Int, offset: Int): List<NoteEntity>
 
     @Query("SELECT * FROM notes WHERE localId = :localId")
     suspend fun getNoteByLocalId(localId: Int): NoteEntity?
@@ -13,8 +13,8 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE remoteId = :remoteId")
     suspend fun getNoteByRemoteId(remoteId: Int): NoteEntity?
 
-    @Query("SELECT * FROM notes WHERE (:title IS NULL OR title LIKE '%' || :title || '%') AND (:description IS NULL OR content LIKE '%' || :description || '%')")
-    suspend fun filterNotes(title: String?, description: String?): List<NoteEntity>
+    @Query("SELECT * FROM notes WHERE (:title IS NULL OR title LIKE '%' || :title || '%') AND (:description IS NULL OR content LIKE '%' || :description || '%') LIMIT :pageSize OFFSET :offset")
+    suspend fun filterNotes(title: String?, description: String?, pageSize: Int, offset: Int): List<NoteEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNote(note: NoteEntity): Long
