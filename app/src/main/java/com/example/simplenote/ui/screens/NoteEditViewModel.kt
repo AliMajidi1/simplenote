@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 
 sealed class NoteEditUiState {
     object Loading : NoteEditUiState()
@@ -113,5 +115,91 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
                 onError(e.message ?: "Unknown error")
             }
         }
+    }
+
+    private val _showAiDialog = MutableStateFlow(false)
+    val showAiDialog: StateFlow<Boolean> = _showAiDialog.asStateFlow()
+    fun setShowAiDialog(show: Boolean) { _showAiDialog.value = show }
+
+    private val _aiPrompt = MutableStateFlow("")
+    val aiPrompt: StateFlow<String> = _aiPrompt.asStateFlow()
+    fun onAiPromptChange(prompt: String) { _aiPrompt.value = prompt }
+
+    private val _aiLoading = MutableStateFlow(false)
+    val aiLoading: StateFlow<Boolean> = _aiLoading.asStateFlow()
+
+    private val _aiError = MutableStateFlow<String?>(null)
+    val aiError: StateFlow<String?> = _aiError.asStateFlow()
+    fun clearAiError() { _aiError.value = null }
+
+    private val _aiResult = MutableStateFlow<String?>(null)
+    val aiResult: StateFlow<String?> = _aiResult.asStateFlow()
+    fun clearAiResult() { _aiResult.value = null }
+
+    fun requestAiDraft(apiKey: String) {
+        val prompt = _aiPrompt.value.trim()
+        if (prompt.isBlank()) {
+            _aiError.value = "Prompt cannot be empty"
+            return
+        }
+        _aiLoading.value = true
+        _aiError.value = null
+        _aiResult.value = null
+        viewModelScope.launch {
+            try {
+                val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
+
+                val body = """
+                    {\n  \"contents\": [\n    {\n      \"parts\": [\n        { \"text\": \"$prompt\" }\n      ]\n    }\n  ]\n}\n"""
+                val client = okhttp3.OkHttpClient()
+                val request = okhttp3.Request.Builder()
+                    .url(url)
+                    .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
+                    .addHeader("Content-Type", "application/json")
+                    .build()
+                val response = client.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    _aiError.value = "AI request failed: ${response.code}"
+                    _aiLoading.value = false
+                    return@launch
+                }
+                val respStr = response.body?.string() ?: ""
+                val text = parseGeminiResponse(respStr)
+                if (text.isNullOrBlank()) {
+                    _aiError.value = "No AI result returned"
+                } else {
+                    _aiResult.value = text
+                }
+            } catch (e: Exception) {
+                _aiError.value = e.message ?: "Unknown error"
+            } finally {
+                _aiLoading.value = false
+            }
+        }
+    }
+
+    private fun parseGeminiResponse(json: String): String? {
+        try {
+            val obj = org.json.JSONObject(json)
+            val candidates = obj.optJSONArray("candidates") ?: return null
+            if (candidates.length() == 0) return null
+            val content = candidates.getJSONObject(0).optJSONObject("content") ?: return null
+            val parts = content.optJSONArray("parts") ?: return null
+            if (parts.length() == 0) return null
+            return parts.getJSONObject(0).optString("text")
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    fun applyAiDraft() {
+        val result = _aiResult.value ?: return
+        val lines = result.lines().filter { it.isNotBlank() }
+        if (lines.isNotEmpty()) {
+            _title.value = lines.first().take(60)
+            _description.value = lines.drop(1).joinToString("\n").take(2000)
+        }
+        _showAiDialog.value = false
+        clearAiResult()
     }
 }
