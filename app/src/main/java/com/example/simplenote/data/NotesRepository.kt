@@ -26,6 +26,8 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                     noteDao.insertNote(entity)
                     note
                 } ?: emptyList()
+            } else if (response.code() == 404) {
+                emptyList()
             } else {
                 isOffline = true
                 val actualPage = page ?: 1
@@ -64,6 +66,8 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                     noteDao.insertNote(entity)
                     note
                 } ?: emptyList()
+            } else if (response.code() == 404) {
+                emptyList()
             } else {
                 isOffline = true
                 val actualPage = page ?: 1
