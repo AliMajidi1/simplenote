@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.simplenote.data.NotesRepository
 import com.example.simplenote.data.model.Note
 import com.example.simplenote.data.model.NoteRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 
@@ -148,23 +150,23 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
         viewModelScope.launch {
             try {
                 val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey"
-
                 val body = """
                     {\n  \"contents\": [\n    {\n      \"parts\": [\n        { \"text\": \"$prompt\" }\n      ]\n    }\n  ]\n}\n"""
-                val client = okhttp3.OkHttpClient()
-                val request = okhttp3.Request.Builder()
-                    .url(url)
-                    .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
-                    .addHeader("Content-Type", "application/json")
-                    .build()
-                val response = client.newCall(request).execute()
-                if (!response.isSuccessful) {
-                    _aiError.value = "AI request failed: ${response.code}"
-                    _aiLoading.value = false
-                    return@launch
+                val text = withContext(Dispatchers.IO) {
+                    val client = okhttp3.OkHttpClient()
+                    val request = okhttp3.Request.Builder()
+                        .url(url)
+                        .post(body.toRequestBody("application/json".toMediaTypeOrNull()))
+                        .addHeader("Content-Type", "application/json")
+                        .build()
+                    val response = client.newCall(request).execute()
+                    if (!response.isSuccessful) {
+                        _aiError.value = "AI request failed: ${response.code}"
+                        return@withContext null
+                    }
+                    val respStr = response.body?.string() ?: ""
+                    parseGeminiResponse(respStr)
                 }
-                val respStr = response.body?.string() ?: ""
-                val text = parseGeminiResponse(respStr)
                 if (text.isNullOrBlank()) {
                     _aiError.value = "No AI result returned"
                 } else {
