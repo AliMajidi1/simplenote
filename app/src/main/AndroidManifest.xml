@@ -18,6 +18,9 @@
         <meta-data android:name="io.sentry.dsn"
                    android:value="https://64dd080d27059aae86cca218d089123b@o4510000372121600.ingest.de.sentry.io/4510000376119376" />
 
+        <meta-data android:name="gemini.apikey"
+                   android:value="AIzaSyBjuweXz5gBkQARDwosDipcQuhBIE02rQY" />
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"

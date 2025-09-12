@@ -2,6 +2,7 @@ package com.example.simplenote.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplenote.data.GeminiRepository
 import com.example.simplenote.data.NotesRepository
 import com.example.simplenote.data.model.Note
 import com.example.simplenote.data.model.NoteRequest
@@ -18,7 +19,7 @@ sealed class NoteEditUiState {
     data class Error(val message: String) : NoteEditUiState()
 }
 
-class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewModel() {
+class NoteEditViewModel(private val notesRepository: NotesRepository, private val geminiRepository: GeminiRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<NoteEditUiState>(NoteEditUiState.Loading)
     val uiState: StateFlow<NoteEditUiState> = _uiState.asStateFlow()
 
@@ -113,5 +114,65 @@ class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewMode
                 onError(e.message ?: "Unknown error")
             }
         }
+    }
+
+    private val _showAiDialog = MutableStateFlow(false)
+    val showAiDialog: StateFlow<Boolean> = _showAiDialog.asStateFlow()
+    fun setShowAiDialog(show: Boolean) { _showAiDialog.value = show }
+
+    private val _aiPrompt = MutableStateFlow("")
+    val aiPrompt: StateFlow<String> = _aiPrompt.asStateFlow()
+    fun onAiPromptChange(prompt: String) { _aiPrompt.value = prompt }
+
+    private val _aiLoading = MutableStateFlow(false)
+    val aiLoading: StateFlow<Boolean> = _aiLoading.asStateFlow()
+
+    private val _aiError = MutableStateFlow<String?>(null)
+    val aiError: StateFlow<String?> = _aiError.asStateFlow()
+    fun clearAiError() { _aiError.value = null }
+
+    private val _aiResult = MutableStateFlow<String?>(null)
+    val aiResult: StateFlow<String?> = _aiResult.asStateFlow()
+    fun clearAiResult() {
+        _aiResult.value = null
+        _aiPrompt.value = ""
+    }
+
+    fun requestAiDraft() {
+        val prompt = _aiPrompt.value.trim()
+        if (prompt.isBlank()) {
+            _aiError.value = "Prompt cannot be empty"
+            return
+        }
+        _aiLoading.value = true
+        _aiError.value = null
+        _aiResult.value = null
+        viewModelScope.launch {
+            try {
+                val result = geminiRepository.generateContent(prompt)
+                if (result.isSuccess) {
+                    val text = result.getOrNull()
+                    if (text.isNullOrBlank()) {
+                        _aiError.value = "No AI result returned"
+                    } else {
+                        _aiResult.value = text
+                    }
+                } else {
+                    _aiError.value = result.exceptionOrNull()?.message ?: "AI request failed"
+                }
+            } catch (e: Exception) {
+                _aiError.value = e.message ?: "Unknown error"
+            } finally {
+                _aiLoading.value = false
+            }
+        }
+    }
+
+    fun applyAiDraft() {
+        val result = _aiResult.value ?: return
+        _title.value = _aiPrompt.value
+        _description.value = result
+        _showAiDialog.value = false
+        clearAiResult()
     }
 }
