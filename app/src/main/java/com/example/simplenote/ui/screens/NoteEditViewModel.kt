@@ -2,6 +2,7 @@ package com.example.simplenote.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.simplenote.data.GeminiRepository
 import com.example.simplenote.data.NotesRepository
 import com.example.simplenote.data.model.Note
 import com.example.simplenote.data.model.NoteRequest
@@ -22,7 +23,7 @@ sealed class NoteEditUiState {
     data class Error(val message: String) : NoteEditUiState()
 }
 
-class NoteEditViewModel(private val notesRepository: NotesRepository) : ViewModel() {
+class NoteEditViewModel(private val notesRepository: NotesRepository, private val geminiRepository: GeminiRepository) : ViewModel() {
     private val _uiState = MutableStateFlow<NoteEditUiState>(NoteEditUiState.Loading)
     val uiState: StateFlow<NoteEditUiState> = _uiState.asStateFlow()
 

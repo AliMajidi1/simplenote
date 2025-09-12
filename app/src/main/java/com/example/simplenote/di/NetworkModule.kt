@@ -8,6 +8,8 @@ import com.example.simplenote.data.TokenStore
 import com.example.simplenote.data.local.AppDatabase
 import com.example.simplenote.data.remote.AuthApi
 import com.example.simplenote.data.remote.NotesApi
+import com.example.simplenote.data.remote.GeminiApi
+import com.example.simplenote.data.GeminiRepository
 import io.sentry.okhttp.SentryOkHttpInterceptor
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -20,6 +22,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -47,9 +50,12 @@ val NetworkModule = module {
     }
     single { get<AppDatabase>().noteDao() }
     single { com.example.simplenote.data.NotesRepository(get(), get()) }
+    single(named("geminiRetrofit")) { provideRetrofit(get(), "https://generativelanguage.googleapis.com/") }
+    single { get<Retrofit>(named("geminiRetrofit")).create(GeminiApi::class.java) }
+    single { GeminiRepository(get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
-    viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get()) }
+    viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.SettingsViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.ChangePasswordViewModel(get()) }
 }
