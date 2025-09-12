@@ -30,6 +30,10 @@ class MainActivity : ComponentActivity() {
                 shouldNavigateToLogin.value = true
             }
         }
+        val notesRepository = get<com.example.simplenote.data.NotesRepository>()
+        lifecycleScope.launch {
+            notesRepository.syncPendingNotes()
+        }
     }
 
     override fun onResume() {
