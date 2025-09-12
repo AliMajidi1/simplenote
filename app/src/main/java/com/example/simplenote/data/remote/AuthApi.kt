@@ -1,6 +1,7 @@
 package com.example.simplenote.data.remote
 
 import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -16,8 +17,8 @@ data class TokenObtainPairResponse(
 
 @Serializable
 data class RegisterRequest(
-    val firstName: String,
-    val lastName: String,
+    @SerializedName("first_name") val firstName: String,
+    @SerializedName("last_name") val lastName: String,
     val username: String,
     val email: String,
     val password: String
