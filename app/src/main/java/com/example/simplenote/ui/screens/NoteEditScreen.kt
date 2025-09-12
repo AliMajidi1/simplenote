@@ -44,7 +44,6 @@ fun NoteEditScreen(
     val aiLoading by viewModel.aiLoading.collectAsState()
     val aiError by viewModel.aiError.collectAsState()
     val aiResult by viewModel.aiResult.collectAsState()
-    val apiKey = "AIzaSyBjuweXz5gBkQARDwosDipcQuhBIE02rQY"
 
     fun handleBack() {
         if (uiState !is NoteEditUiState.Loading && uiState !is NoteEditUiState.Deleting) {
@@ -312,7 +311,7 @@ fun NoteEditScreen(
                             text = if (aiResult == null) "Generate" else "Apply to Note",
                             onClick = {
                                 if (aiResult == null) {
-                                    viewModel.requestAiDraft(apiKey)
+                                    viewModel.requestAiDraft()
                                 } else {
                                     viewModel.applyAiDraft()
                                 }
@@ -323,7 +322,7 @@ fun NoteEditScreen(
                     if (aiError != null) {
                         Spacer(Modifier.height(8.dp))
                         Text(aiError ?: "", color = Color.Red, fontSize = 14.sp)
-                        TextButton(onClick = { viewModel.requestAiDraft(apiKey) }) {
+                        TextButton(onClick = { viewModel.requestAiDraft() }) {
                             Text("Retry", color = Color(0xFF6C4EE6))
                         }
                     }

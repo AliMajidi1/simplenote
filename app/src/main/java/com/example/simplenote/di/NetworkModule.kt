@@ -52,7 +52,7 @@ val NetworkModule = module {
     single { com.example.simplenote.data.NotesRepository(get(), get()) }
     single(named("geminiRetrofit")) { provideRetrofit(get(), "https://generativelanguage.googleapis.com/") }
     single { get<Retrofit>(named("geminiRetrofit")).create(GeminiApi::class.java) }
-    single { GeminiRepository(get()) }
+    single { GeminiRepository(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get(), get()) }

@@ -138,7 +138,7 @@ class NoteEditViewModel(private val notesRepository: NotesRepository, private va
         _aiPrompt.value = ""
     }
 
-    fun requestAiDraft(apiKey: String) {
+    fun requestAiDraft() {
         val prompt = _aiPrompt.value.trim()
         if (prompt.isBlank()) {
             _aiError.value = "Prompt cannot be empty"
@@ -149,7 +149,7 @@ class NoteEditViewModel(private val notesRepository: NotesRepository, private va
         _aiResult.value = null
         viewModelScope.launch {
             try {
-                val result = geminiRepository.generateContent(apiKey, prompt)
+                val result = geminiRepository.generateContent(prompt)
                 if (result.isSuccess) {
                     val text = result.getOrNull()
                     if (text.isNullOrBlank()) {

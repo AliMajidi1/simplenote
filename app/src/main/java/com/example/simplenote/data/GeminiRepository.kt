@@ -1,5 +1,6 @@
 package com.example.simplenote.data
 
+import android.content.Context
 import com.example.simplenote.data.remote.GeminiApi
 import com.example.simplenote.data.remote.GeminiContent
 import com.example.simplenote.data.remote.GeminiContentPart
@@ -7,8 +8,13 @@ import com.example.simplenote.data.remote.GeminiRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class GeminiRepository(private val geminiApi: GeminiApi) {
-    suspend fun generateContent(apiKey: String, prompt: String): Result<String> = withContext(Dispatchers.IO) {
+class GeminiRepository(private val context: Context, private val geminiApi: GeminiApi) {
+    private val apiKey: String by lazy {
+        val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+        appInfo.metaData?.getString("gemini.apikey") ?: throw IllegalStateException("Gemini API key not found in manifest")
+    }
+
+    suspend fun generateContent(prompt: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val request = GeminiRequest(
                 contents = listOf(
@@ -32,4 +38,3 @@ class GeminiRepository(private val geminiApi: GeminiApi) {
         }
     }
 }
-
