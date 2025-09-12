@@ -9,7 +9,12 @@ import com.example.simplenote.data.model.NoteRequest
 import com.example.simplenote.data.remote.NotesApi
 
 class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteDao) {
+    private var isOffline: Boolean = false
+
     suspend fun getNotes(page: Int? = null, pageSize: Int? = null): List<Note> {
+        if (isOffline) {
+            return noteDao.getAllNotes().map { it.toNote() }
+        }
         return try {
             val response = notesApi.getNotes(page, pageSize)
             if (response.isSuccessful) {
@@ -19,9 +24,11 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                     note
                 } ?: emptyList()
             } else {
+                isOffline = true
                 noteDao.getAllNotes().map { it.toNote() }
             }
         } catch (e: Exception) {
+            isOffline = true
             noteDao.getAllNotes().map { it.toNote() }
         }
     }
@@ -34,6 +41,9 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
         page: Int? = null,
         pageSize: Int? = null
     ): List<Note> {
+        if (isOffline) {
+            return noteDao.filterNotes(title, description).map { it.toNote() }
+        }
         return try {
             val response = notesApi.filterNotes(title, description, updatedGte, updatedLte, page, pageSize)
             if (response.isSuccessful) {
@@ -43,14 +53,25 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                     note
                 } ?: emptyList()
             } else {
+                isOffline = true
                 noteDao.filterNotes(title, description).map { it.toNote() }
             }
         } catch (e: Exception) {
+            isOffline = true
             noteDao.filterNotes(title, description).map { it.toNote() }
         }
     }
 
     suspend fun createNote(note: NoteRequest): Note? {
+        if (isOffline) {
+            val entity = NoteEntity(
+                title = note.title,
+                content = note.description,
+                syncAction = "CREATE"
+            )
+            val id = noteDao.insertNote(entity)
+            return noteDao.getNoteById(id)?.toNote()
+        }
         return try {
             val response = notesApi.createNote(note)
             if (response.isSuccessful) {
@@ -58,9 +79,11 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 noteDao.insertNote(createdNote.toEntity())
                 createdNote
             } else {
+                isOffline = true
                 null
             }
         } catch (e: Exception) {
+            isOffline = true
             val entity = NoteEntity(
                 title = note.title,
                 content = note.description,
@@ -72,6 +95,9 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun getNote(id: Int): Note? {
+        if (isOffline) {
+            return noteDao.getNoteByRemoteId(id)?.toNote()
+        }
         return try {
             val response = notesApi.getNote(id)
             if (response.isSuccessful) {
@@ -79,14 +105,28 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 noteDao.insertNote(note.toEntity())
                 note
             } else {
+                isOffline = true
                 noteDao.getNoteByRemoteId(id)?.toNote()
             }
         } catch (e: Exception) {
+            isOffline = true
             noteDao.getNoteByRemoteId(id)?.toNote()
         }
     }
 
     suspend fun updateNote(id: Int, note: NoteRequest): Note? {
+        if (isOffline) {
+            val entity = noteDao.getNoteByRemoteId(id)?.copy(
+                title = note.title,
+                content = note.description,
+                syncAction = "UPDATE"
+            )
+            if (entity != null) {
+                noteDao.insertNote(entity)
+                return entity.toNote()
+            }
+            return null
+        }
         return try {
             val response = notesApi.updateNote(id, note)
             if (response.isSuccessful) {
@@ -94,9 +134,11 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                 noteDao.insertNote(updatedNote.toEntity())
                 updatedNote
             } else {
+                isOffline = true
                 null
             }
         } catch (e: Exception) {
+            isOffline = true
             val entity = noteDao.getNoteByRemoteId(id)?.copy(
                 title = note.title,
                 content = note.description,
@@ -112,15 +154,21 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
     }
 
     suspend fun deleteNote(id: Int): Boolean {
+        if (isOffline) {
+            noteDao.markNoteForSync(id, "DELETE")
+            return true
+        }
         return try {
             val response = notesApi.deleteNote(id)
             if (response.isSuccessful) {
                 noteDao.deleteNoteByRemoteId(id)
                 true
             } else {
+                isOffline = true
                 false
             }
         } catch (e: Exception) {
+            isOffline = true
             noteDao.markNoteForSync(id, "DELETE")
             true
         }
@@ -128,6 +176,7 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
 
     suspend fun syncPendingNotes() {
         val pendingNotes = noteDao.getNotesWithSyncAction()
+        var allSuccess = true
         for (note in pendingNotes) {
             try {
                 when (note.syncAction) {
@@ -146,6 +195,8 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                                 syncAction = null
                             )
                             noteDao.insertNote(updatedEntity)
+                        } else {
+                            allSuccess = false
                         }
                     }
                     "UPDATE" -> {
@@ -162,7 +213,11 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                                     syncAction = null
                                 )
                                 noteDao.insertNote(updatedEntity)
+                            } else {
+                                allSuccess = false
                             }
+                        } else {
+                            allSuccess = false
                         }
                     }
                     "DELETE" -> {
@@ -171,6 +226,8 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                             val response = notesApi.deleteNote(remoteId)
                             if (response.isSuccessful) {
                                 noteDao.deleteNoteByRemoteId(remoteId)
+                            } else {
+                                allSuccess = false
                             }
                         } else {
                             note.localId?.let { noteDao.deleteNoteByLocalId(it) }
@@ -178,7 +235,9 @@ class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteD
                     }
                 }
             } catch (_: Exception) {
+                allSuccess = false
             }
         }
+        isOffline = !allSuccess
     }
 }
