@@ -133,7 +133,10 @@ class NoteEditViewModel(private val notesRepository: NotesRepository, private va
 
     private val _aiResult = MutableStateFlow<String?>(null)
     val aiResult: StateFlow<String?> = _aiResult.asStateFlow()
-    fun clearAiResult() { _aiResult.value = null }
+    fun clearAiResult() {
+        _aiResult.value = null
+        _aiPrompt.value = ""
+    }
 
     fun requestAiDraft(apiKey: String) {
         val prompt = _aiPrompt.value.trim()
@@ -167,11 +170,8 @@ class NoteEditViewModel(private val notesRepository: NotesRepository, private va
 
     fun applyAiDraft() {
         val result = _aiResult.value ?: return
-        val lines = result.lines().filter { it.isNotBlank() }
-        if (lines.isNotEmpty()) {
-            _title.value = lines.first().take(60)
-            _description.value = lines.drop(1).joinToString("\n").take(2000)
-        }
+        _title.value = _aiPrompt.value
+        _description.value = result
         _showAiDialog.value = false
         clearAiResult()
     }
