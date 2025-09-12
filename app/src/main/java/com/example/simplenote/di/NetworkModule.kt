@@ -74,7 +74,8 @@ private fun provideOkHttpClient(
         .addInterceptor(Interceptor { chain: Interceptor.Chain ->
             val original = chain.request()
             val isAuthEndpoint = original.url.encodedPath.startsWith("/api/auth/")
-            if (isAuthEndpoint) {
+            val isGeminiEndpoint = original.url.host.contains("googleapis.com")
+            if (isAuthEndpoint || isGeminiEndpoint) {
                 return@Interceptor chain.proceed(original)
             }
             val tokens = runBlocking { tokenStore.tokensFlow.first() }
