@@ -266,7 +266,7 @@ fun NoteEditScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(24.dp)
+                .padding(bottom = 80.dp, end = 24.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(50),
@@ -301,7 +301,8 @@ fun NoteEditScreen(
                         placeholder = { Text("Enter your prompt (e.g. Summarize, Motivate...)") },
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth(),
-                        maxLines = 4
+                        maxLines = 4,
+                        textStyle = TextStyle(color = Color.Black, fontSize = 16.sp)
                     )
                     Spacer(Modifier.height(12.dp))
                     if (aiLoading) {
