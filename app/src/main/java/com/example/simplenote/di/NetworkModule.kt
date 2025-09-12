@@ -39,7 +39,7 @@ val NetworkModule = module {
     single { SessionManager() }
     single { TokenStore(get<Context>()) }
     single { provideOkHttpClient(get(), { get<AuthApi>() }, get()) }
-    single { provideRetrofit(get(), getProperty("BASE_URL")) }
+    single { provideRetrofit(get(), getBackendBaseUrl(get())) }
     single { get<Retrofit>().create(AuthApi::class.java) }
     single { AuthRepository(get(), get()) }
     single { get<Retrofit>().create(NotesApi::class.java) }
@@ -50,7 +50,7 @@ val NetworkModule = module {
     }
     single { get<AppDatabase>().noteDao() }
     single { com.example.simplenote.data.NotesRepository(get(), get()) }
-    single(named("geminiRetrofit")) { provideRetrofit(get(), "https://generativelanguage.googleapis.com/") }
+    single(named("geminiRetrofit")) { provideRetrofit(get(), getGeminiBaseUrl(get())) }
     single { get<Retrofit>(named("geminiRetrofit")).create(GeminiApi::class.java) }
     single { GeminiRepository(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
@@ -58,6 +58,16 @@ val NetworkModule = module {
     viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.SettingsViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.ChangePasswordViewModel(get()) }
+}
+
+private fun getBackendBaseUrl(context: Context): String {
+    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+    return appInfo.metaData.getString("backend.baseurl") ?: throw IllegalStateException("backend.baseurl not found in manifest")
+}
+
+private fun getGeminiBaseUrl(context: Context): String {
+    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+    return appInfo.metaData.getString("gemini.baseurl") ?: throw IllegalStateException("gemini.baseurl not found in manifest")
 }
 
 @OptIn(DelicateCoroutinesApi::class)
