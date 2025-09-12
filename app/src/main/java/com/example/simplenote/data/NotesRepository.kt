@@ -9,7 +9,7 @@ import com.example.simplenote.data.model.NoteRequest
 import com.example.simplenote.data.remote.NotesApi
 
 class NotesRepository(private val notesApi: NotesApi, private val noteDao: NoteDao) {
-    private var isOffline: Boolean = false
+    private var isOffline: Boolean = true
 
     suspend fun getNotes(page: Int? = null, pageSize: Int? = null): List<Note> {
         if (isOffline) {
