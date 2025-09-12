@@ -35,6 +35,21 @@ class SessionManager {
     suspend fun notifySessionExpired() { _sessionExpired.emit(Unit) }
 }
 
+private fun getBackendBaseUrl(context: Context): String {
+    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+    return appInfo.metaData.getString("backend.baseurl") ?: throw IllegalStateException("backend.baseurl not found in manifest")
+}
+
+private fun getGeminiBaseUrl(context: Context): String {
+    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+    return appInfo.metaData.getString("gemini.baseurl") ?: throw IllegalStateException("gemini.baseurl not found in manifest")
+}
+
+private fun getGeminiApiKey(context: Context): String {
+    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
+    return appInfo.metaData.getString("gemini.apikey") ?: throw IllegalStateException("gemini.apikey not found in manifest")
+}
+
 val NetworkModule = module {
     single { SessionManager() }
     single { TokenStore(get<Context>()) }
@@ -52,22 +67,12 @@ val NetworkModule = module {
     single { com.example.simplenote.data.NotesRepository(get(), get()) }
     single(named("geminiRetrofit")) { provideRetrofit(get(), getGeminiBaseUrl(get())) }
     single { get<Retrofit>(named("geminiRetrofit")).create(GeminiApi::class.java) }
-    single { GeminiRepository(get(), get()) }
+    single { GeminiRepository(getGeminiApiKey(get()), get()) }
     viewModel { com.example.simplenote.ui.screens.LoginViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.HomeViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.NoteEditViewModel(get(), get()) }
     viewModel { com.example.simplenote.ui.screens.SettingsViewModel(get()) }
     viewModel { com.example.simplenote.ui.screens.ChangePasswordViewModel(get()) }
-}
-
-private fun getBackendBaseUrl(context: Context): String {
-    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
-    return appInfo.metaData.getString("backend.baseurl") ?: throw IllegalStateException("backend.baseurl not found in manifest")
-}
-
-private fun getGeminiBaseUrl(context: Context): String {
-    val appInfo = context.packageManager.getApplicationInfo(context.packageName, android.content.pm.PackageManager.GET_META_DATA)
-    return appInfo.metaData.getString("gemini.baseurl") ?: throw IllegalStateException("gemini.baseurl not found in manifest")
 }
 
 @OptIn(DelicateCoroutinesApi::class)
